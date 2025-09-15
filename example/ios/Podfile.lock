@@ -1,0 +1,56 @@
+PODS:
+  - CocoaAsyncSocket (7.6.5)
+  - CocoaLumberjack (3.9.0):
+    - CocoaLumberjack/Core (= 3.9.0)
+  - CocoaLumberjack/Core (3.9.0)
+  - Flutter (1.0.0)
+  - fxmpp (0.1.0):
+    - Flutter
+    - XMPPFramework (~> 4.0)
+  - KissXML (5.3.1):
+    - KissXML/All (= 5.3.1)
+  - KissXML/Additions (5.3.1):
+    - KissXML/Core
+  - KissXML/All (5.3.1):
+    - KissXML/Additions
+    - KissXML/Core
+  - KissXML/Core (5.3.1)
+  - libidn (1.35)
+  - XMPPFramework (4.0.0):
+    - XMPPFramework/default (= 4.0.0)
+  - XMPPFramework/default (4.0.0):
+    - CocoaAsyncSocket (~> 7.6)
+    - CocoaLumberjack
+    - KissXML (~> 5.2)
+    - libidn (~> 1.35)
+
+DEPENDENCIES:
+  - Flutter (from `Flutter`)
+  - fxmpp (from `.symlinks/plugins/fxmpp/ios`)
+
+SPEC REPOS:
+  trunk:
+    - CocoaAsyncSocket
+    - CocoaLumberjack
+    - KissXML
+    - libidn
+    - XMPPFramework
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: Flutter
+  fxmpp:
+    :path: ".symlinks/plugins/fxmpp/ios"
+
+SPEC CHECKSUMS:
+  CocoaAsyncSocket: 065fd1e645c7abab64f7a6a2007a48038fdc6a99
+  CocoaLumberjack: 5644158777912b7de7469fa881f8a3f259c2512a
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  fxmpp: 681af6148cd39a4d050b3dfbf2cf017052aaf7b1
+  KissXML: 5c8e0f2e8b9f071d3e1ae123dec3eb5da615c10c
+  libidn: e4576a956b797c584c77aaedfc6e3dd639b61bdc
+  XMPPFramework: 5d31ff9f73dce031b24bc49bcf88093627a3a86e
+
+PODFILE CHECKSUM: 3c63482e143d1b91d2d2560aee9fb04ecc74ac7e
+
+COCOAPODS: 1.16.2

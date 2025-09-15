@@ -1,0 +1,61 @@
+group 'dev.hainguyen.fxmpp'
+version '1.0-SNAPSHOT'
+
+buildscript {
+    ext.kotlin_version = '1.7.10'
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:7.3.0'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+android {
+    namespace 'dev.hainguyen.fxmpp'
+    compileSdkVersion 33
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+    }
+
+    defaultConfig {
+        minSdkVersion 16
+    }
+
+    dependencies {
+        implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+        implementation 'org.igniterealtime.smack:smack-android-extensions:4.4.6'
+        implementation 'org.igniterealtime.smack:smack-tcp:4.4.6'
+        implementation 'org.igniterealtime.smack:smack-im:4.4.6'
+        implementation 'org.igniterealtime.smack:smack-extensions:4.4.6'
+        
+        // Exclude duplicate XPP3 dependencies
+        configurations.all {
+            exclude group: 'xpp3', module: 'xpp3'
+            exclude group: 'xpp3', module: 'xpp3_min'
+        }
+    }
+}

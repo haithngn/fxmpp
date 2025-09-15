@@ -1,0 +1,5 @@
+*.DS_Store
+example/android/build
+.dart_tool
+.idea
+Pods
