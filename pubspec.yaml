@@ -1,6 +1,6 @@
 name: fxmpp
 description: A Flutter plugin for XMPP (Extensible Messaging and Presence Protocol) communication, supporting both iOS and Android platforms.
-version: 1.0.0-alpha
+version: 1.0.0-alpha.2
 homepage: https://hainguyen.dev
 repository: https://github.com/haithngn/fxmpp
 

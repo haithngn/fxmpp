@@ -5,6 +5,43 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0-alpha.2] - 2025-01-17
+
+### Changed
+- **BREAKING: MUC API Consistency**: Refactored MUC (Multi-User Chat) methods to accept `XmlDocument` objects instead of primitive types
+  - `sendMucMessage()` now accepts `XmlDocument message` parameter
+  - `sendMucPrivateMessage()` now accepts `XmlDocument message` parameter
+  - This change ensures API consistency with existing `sendMessage()`, `sendPresence()`, and `sendIq()` methods
+
+### Added
+- **MUC Utility Methods**: New static methods for creating MUC XML stanzas
+  - `Fxmpp.createMucMessage()` - Creates groupchat message stanzas for room messages
+  - `Fxmpp.createMucPrivateMessage()` - Creates chat message stanzas for private messages to room participants
+- **Enhanced Example App**: Updated MUC examples to demonstrate new API usage
+
+### Migration Guide
+- Replace `sendMucMessage(roomJid: string, message: string)` calls with:
+  ```dart
+  final mucMessage = Fxmpp.createMucMessage(
+    messageId: Fxmpp.generateId('muc'),
+    roomJid: roomJid,
+    fromJid: senderJid,
+    message: messageContent,
+  );
+  await fxmpp.sendMucMessage(mucMessage);
+  ```
+- Replace `sendMucPrivateMessage(roomJid: string, nickname: string, message: string)` calls with:
+  ```dart
+  final privateMessage = Fxmpp.createMucPrivateMessage(
+    messageId: Fxmpp.generateId('muc_private'),
+    roomJid: roomJid,
+    nickname: targetNickname,
+    fromJid: senderJid,
+    message: messageContent,
+  );
+  await fxmpp.sendMucPrivateMessage(privateMessage);
+  ```
+
 ## [1.0.0-alpha] - 2025-01-15
 
 ### Added

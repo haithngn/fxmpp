@@ -29,10 +29,15 @@ class MethodChannelFxmpp extends FxmppPlatform {
   @visibleForTesting
   final iqEventChannel = const EventChannel('fxmpp/iq');
 
+  /// The event channel for receiving MUC events
+  @visibleForTesting
+  final mucEventChannel = const EventChannel('fxmpp/muc_events');
+
   Function(XmppConnectionState)? _connectionStateCallback;
   Function(XmlDocument)? _messageCallback;
   Function(XmlDocument)? _presenceCallback;
   Function(XmlDocument)? _iqCallback;
+  Function(Map<String, dynamic>)? _mucEventCallback;
 
   @override
   Future<void> initialize() async {
@@ -94,6 +99,12 @@ class MethodChannelFxmpp extends FxmppPlatform {
         }
       }
     });
+
+    mucEventChannel.receiveBroadcastStream().listen((event) {
+      if (_mucEventCallback != null && event is Map<String, dynamic>) {
+        _mucEventCallback!(event);
+      }
+    });
   }
 
   @override
@@ -153,5 +164,236 @@ class MethodChannelFxmpp extends FxmppPlatform {
   @override
   void setIqCallback(Function(XmlDocument) callback) {
     _iqCallback = callback;
+  }
+
+  // ============================================================================
+  // MUC (Multi-User Chat) METHODS
+  // ============================================================================
+
+  @override
+  Future<bool> joinMucRoom({
+    required String roomJid,
+    required String nickname,
+    String? password,
+    int? maxStanzas,
+    DateTime? since,
+  }) async {
+    final params = <String, dynamic>{
+      'roomJid': roomJid,
+      'nickname': nickname,
+    };
+    if (password != null) params['password'] = password;
+    if (maxStanzas != null) params['maxStanzas'] = maxStanzas;
+    if (since != null) params['since'] = since.millisecondsSinceEpoch;
+
+    final result = await methodChannel.invokeMethod<bool>('joinMucRoom', params);
+    return result ?? false;
+  }
+
+  @override
+  Future<bool> leaveMucRoom({
+    required String roomJid,
+    String? reason,
+  }) async {
+    final params = <String, dynamic>{
+      'roomJid': roomJid,
+    };
+    if (reason != null) params['reason'] = reason;
+
+    final result = await methodChannel.invokeMethod<bool>('leaveMucRoom', params);
+    return result ?? false;
+  }
+
+  @override
+  Future<bool> sendMucMessage(XmlDocument message) async {
+    final result = await methodChannel
+        .invokeMethod<bool>('sendMucMessage', {'xml': message.toXmlString()});
+    return result ?? false;
+  }
+
+  @override
+  Future<bool> sendMucPrivateMessage(XmlDocument message) async {
+    final result = await methodChannel
+        .invokeMethod<bool>('sendMucPrivateMessage', {'xml': message.toXmlString()});
+    return result ?? false;
+  }
+
+  @override
+  Future<bool> changeMucSubject({
+    required String roomJid,
+    required String subject,
+  }) async {
+    final params = <String, dynamic>{
+      'roomJid': roomJid,
+      'subject': subject,
+    };
+
+    final result = await methodChannel.invokeMethod<bool>('changeMucSubject', params);
+    return result ?? false;
+  }
+
+  @override
+  Future<bool> kickMucParticipant({
+    required String roomJid,
+    required String nickname,
+    String? reason,
+  }) async {
+    final params = <String, dynamic>{
+      'roomJid': roomJid,
+      'nickname': nickname,
+    };
+    if (reason != null) params['reason'] = reason;
+
+    final result = await methodChannel.invokeMethod<bool>('kickMucParticipant', params);
+    return result ?? false;
+  }
+
+  @override
+  Future<bool> banMucUser({
+    required String roomJid,
+    required String userJid,
+    String? reason,
+  }) async {
+    final params = <String, dynamic>{
+      'roomJid': roomJid,
+      'userJid': userJid,
+    };
+    if (reason != null) params['reason'] = reason;
+
+    final result = await methodChannel.invokeMethod<bool>('banMucUser', params);
+    return result ?? false;
+  }
+
+  @override
+  Future<bool> grantMucVoice({
+    required String roomJid,
+    required String nickname,
+    String? reason,
+  }) async {
+    final params = <String, dynamic>{
+      'roomJid': roomJid,
+      'nickname': nickname,
+    };
+    if (reason != null) params['reason'] = reason;
+
+    final result = await methodChannel.invokeMethod<bool>('grantMucVoice', params);
+    return result ?? false;
+  }
+
+  @override
+  Future<bool> revokeMucVoice({
+    required String roomJid,
+    required String nickname,
+    String? reason,
+  }) async {
+    final params = <String, dynamic>{
+      'roomJid': roomJid,
+      'nickname': nickname,
+    };
+    if (reason != null) params['reason'] = reason;
+
+    final result = await methodChannel.invokeMethod<bool>('revokeMucVoice', params);
+    return result ?? false;
+  }
+
+  @override
+  Future<bool> grantMucModerator({
+    required String roomJid,
+    required String nickname,
+    String? reason,
+  }) async {
+    final params = <String, dynamic>{
+      'roomJid': roomJid,
+      'nickname': nickname,
+    };
+    if (reason != null) params['reason'] = reason;
+
+    final result = await methodChannel.invokeMethod<bool>('grantMucModerator', params);
+    return result ?? false;
+  }
+
+  @override
+  Future<bool> grantMucMembership({
+    required String roomJid,
+    required String userJid,
+    String? reason,
+  }) async {
+    final params = <String, dynamic>{
+      'roomJid': roomJid,
+      'userJid': userJid,
+    };
+    if (reason != null) params['reason'] = reason;
+
+    final result = await methodChannel.invokeMethod<bool>('grantMucMembership', params);
+    return result ?? false;
+  }
+
+  @override
+  Future<bool> grantMucAdmin({
+    required String roomJid,
+    required String userJid,
+    String? reason,
+  }) async {
+    final params = <String, dynamic>{
+      'roomJid': roomJid,
+      'userJid': userJid,
+    };
+    if (reason != null) params['reason'] = reason;
+
+    final result = await methodChannel.invokeMethod<bool>('grantMucAdmin', params);
+    return result ?? false;
+  }
+
+  @override
+  Future<bool> inviteMucUser({
+    required String roomJid,
+    required String userJid,
+    String? reason,
+  }) async {
+    final params = <String, dynamic>{
+      'roomJid': roomJid,
+      'userJid': userJid,
+    };
+    if (reason != null) params['reason'] = reason;
+
+    final result = await methodChannel.invokeMethod<bool>('inviteMucUser', params);
+    return result ?? false;
+  }
+
+  @override
+  Future<bool> destroyMucRoom({
+    required String roomJid,
+    String? reason,
+    String? alternativeRoom,
+  }) async {
+    final params = <String, dynamic>{
+      'roomJid': roomJid,
+    };
+    if (reason != null) params['reason'] = reason;
+    if (alternativeRoom != null) params['alternativeRoom'] = alternativeRoom;
+
+    final result = await methodChannel.invokeMethod<bool>('destroyMucRoom', params);
+    return result ?? false;
+  }
+
+  @override
+  Future<bool> createMucRoom({
+    required String roomJid,
+    required String nickname,
+    String? password,
+  }) async {
+    final params = <String, dynamic>{
+      'roomJid': roomJid,
+      'nickname': nickname,
+    };
+    if (password != null) params['password'] = password;
+
+    final result = await methodChannel.invokeMethod<bool>('createMucRoom', params);
+    return result ?? false;
+  }
+
+  @override
+  void setMucEventCallback(Function(Map<String, dynamic>) callback) {
+    _mucEventCallback = callback;
   }
 }

@@ -9,3 +9,10 @@ export 'src/models/message_type.dart';
 export 'src/models/presence_type.dart';
 export 'src/models/iq_type.dart';
 export 'src/fxmpp.dart';
+
+// MUC (Multi-User Chat) exports
+export 'src/muc_manager.dart';
+export 'src/models/muc_room.dart';
+export 'src/models/muc_participant.dart';
+export 'src/models/muc_role.dart';
+export 'src/models/muc_affiliation.dart';

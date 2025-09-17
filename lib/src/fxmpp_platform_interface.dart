@@ -80,4 +80,140 @@ abstract class FxmppPlatform extends PlatformInterface {
   void setIqCallback(Function(XmlDocument) callback) {
     throw UnimplementedError('setIqCallback() has not been implemented.');
   }
+
+  // ============================================================================
+  // MUC (Multi-User Chat) METHODS
+  // ============================================================================
+
+  /// Join a MUC room
+  Future<bool> joinMucRoom({
+    required String roomJid,
+    required String nickname,
+    String? password,
+    int? maxStanzas,
+    DateTime? since,
+  }) {
+    throw UnimplementedError('joinMucRoom() has not been implemented.');
+  }
+
+  /// Leave a MUC room
+  Future<bool> leaveMucRoom({
+    required String roomJid,
+    String? reason,
+  }) {
+    throw UnimplementedError('leaveMucRoom() has not been implemented.');
+  }
+
+  /// Send a message to a MUC room
+  Future<bool> sendMucMessage(XmlDocument message) {
+    throw UnimplementedError('sendMucMessage() has not been implemented.');
+  }
+
+  /// Send a private message to a room participant
+  Future<bool> sendMucPrivateMessage(XmlDocument message) {
+    throw UnimplementedError('sendMucPrivateMessage() has not been implemented.');
+  }
+
+  /// Change room subject/topic
+  Future<bool> changeMucSubject({
+    required String roomJid,
+    required String subject,
+  }) {
+    throw UnimplementedError('changeMucSubject() has not been implemented.');
+  }
+
+  /// Kick a participant from the room
+  Future<bool> kickMucParticipant({
+    required String roomJid,
+    required String nickname,
+    String? reason,
+  }) {
+    throw UnimplementedError('kickMucParticipant() has not been implemented.');
+  }
+
+  /// Ban a user from the room
+  Future<bool> banMucUser({
+    required String roomJid,
+    required String userJid,
+    String? reason,
+  }) {
+    throw UnimplementedError('banMucUser() has not been implemented.');
+  }
+
+  /// Grant voice to a participant
+  Future<bool> grantMucVoice({
+    required String roomJid,
+    required String nickname,
+    String? reason,
+  }) {
+    throw UnimplementedError('grantMucVoice() has not been implemented.');
+  }
+
+  /// Revoke voice from a participant
+  Future<bool> revokeMucVoice({
+    required String roomJid,
+    required String nickname,
+    String? reason,
+  }) {
+    throw UnimplementedError('revokeMucVoice() has not been implemented.');
+  }
+
+  /// Grant moderator privileges to a participant
+  Future<bool> grantMucModerator({
+    required String roomJid,
+    required String nickname,
+    String? reason,
+  }) {
+    throw UnimplementedError('grantMucModerator() has not been implemented.');
+  }
+
+  /// Grant membership to a user
+  Future<bool> grantMucMembership({
+    required String roomJid,
+    required String userJid,
+    String? reason,
+  }) {
+    throw UnimplementedError('grantMucMembership() has not been implemented.');
+  }
+
+  /// Grant admin privileges to a user
+  Future<bool> grantMucAdmin({
+    required String roomJid,
+    required String userJid,
+    String? reason,
+  }) {
+    throw UnimplementedError('grantMucAdmin() has not been implemented.');
+  }
+
+  /// Invite a user to the room
+  Future<bool> inviteMucUser({
+    required String roomJid,
+    required String userJid,
+    String? reason,
+  }) {
+    throw UnimplementedError('inviteMucUser() has not been implemented.');
+  }
+
+  /// Destroy a room (owner only)
+  Future<bool> destroyMucRoom({
+    required String roomJid,
+    String? reason,
+    String? alternativeRoom,
+  }) {
+    throw UnimplementedError('destroyMucRoom() has not been implemented.');
+  }
+
+  /// Create a new MUC room
+  Future<bool> createMucRoom({
+    required String roomJid,
+    required String nickname,
+    String? password,
+  }) {
+    throw UnimplementedError('createMucRoom() has not been implemented.');
+  }
+
+  /// Set MUC event callback
+  void setMucEventCallback(Function(Map<String, dynamic>) callback) {
+    throw UnimplementedError('setMucEventCallback() has not been implemented.');
+  }
 }

@@ -28,7 +28,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  fxmpp: ^1.0.0-alpha
+  fxmpp: ^1.0.0-alpha.2
 ```
 
 Then run:
@@ -347,7 +347,64 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 For issues and questions, please use the [GitHub Issues](https://github.com/haithngn/fxmpp/issues) page.
 
+### Multi-User Chat (MUC) Support
+
+FXMPP supports Multi-User Chat (MUC) functionality for group conversations:
+
+```dart
+// Join a MUC room
+await _fxmpp.joinMucRoom(
+  roomJid: 'room@conference.example.com',
+  nickname: 'MyNickname',
+  password: 'optional-password', // optional
+);
+
+// Send a message to the room
+final mucMessage = Fxmpp.createMucMessage(
+  messageId: Fxmpp.generateId('muc'),
+  roomJid: 'room@conference.example.com',
+  fromJid: 'user@example.com',
+  message: 'Hello everyone!',
+);
+await _fxmpp.sendMucMessage(mucMessage);
+
+// Send a private message to a room participant
+final privateMessage = Fxmpp.createMucPrivateMessage(
+  messageId: Fxmpp.generateId('muc_private'),
+  roomJid: 'room@conference.example.com',
+  nickname: 'TargetUser',
+  fromJid: 'user@example.com',
+  message: 'Private message',
+);
+await _fxmpp.sendMucPrivateMessage(privateMessage);
+
+// Leave the room
+await _fxmpp.leaveMucRoom(
+  roomJid: 'room@conference.example.com',
+  reason: 'Goodbye!', // optional
+);
+
+// Listen to MUC events
+_fxmpp.mucRoomEventStream.listen((event) {
+  print('MUC room event: ${event.type}');
+});
+
+_fxmpp.mucParticipantEventStream.listen((event) {
+  print('Participant event: ${event.type}');
+});
+
+_fxmpp.mucMessageStream.listen((message) {
+  print('MUC message: ${message.body}');
+});
+```
+
 ## Changelog
+
+### 1.0.0-alpha.2
+- **BREAKING**: Refactored MUC API for consistency with other stanza methods
+- Added `Fxmpp.createMucMessage()` and `Fxmpp.createMucPrivateMessage()` utility methods
+- Updated MUC methods to accept `XmlDocument` objects instead of primitive types
+- Enhanced example app with updated MUC usage
 
 ### 1.0.0-alpha
 - Added IQ (Info/Query) stanza support

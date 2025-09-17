@@ -49,16 +49,32 @@ class _MyHomePageState extends State<MyHomePage> {
       TextEditingController(text: 'Hello, user2!');
   final TextEditingController _recipientController =
       TextEditingController(text: 'user2@localhost');
+  
+  // MUC-related controllers
+  final TextEditingController _roomJidController =
+      TextEditingController(text: 'testroom@conference.localhost');
+  final TextEditingController _nicknameController =
+      TextEditingController(text: 'user1');
+  final TextEditingController _roomMessageController =
+      TextEditingController(text: 'Hello everyone!');
+  final TextEditingController _privateMessageController =
+      TextEditingController(text: 'Private message');
+  final TextEditingController _targetNicknameController =
+      TextEditingController(text: 'user2');
+  final TextEditingController _inviteUserController =
+      TextEditingController(text: 'user3@localhost');
 
   XmppConnectionState _connectionState = XmppConnectionState.disconnected;
   final List<XmlDocument> _messages = [];
   final List<XmlDocument> _presences = [];
   final List<XmlDocument> _iqs = [];
+  final List<MucRoomEvent> _mucEvents = [];
 
   StreamSubscription<XmppConnectionState>? _connectionStateSubscription;
   StreamSubscription<XmlDocument>? _messageSubscription;
   StreamSubscription<XmlDocument>? _presenceSubscription;
   StreamSubscription<XmlDocument>? _iqSubscription;
+  StreamSubscription<MucRoomEvent>? _mucEventSubscription;
 
   @override
   void initState() {
@@ -90,6 +106,12 @@ class _MyHomePageState extends State<MyHomePage> {
     _iqSubscription = _fxmpp.iqStream.listen((xmlIq) {
       setState(() {
         _iqs.insert(0, xmlIq);
+      });
+    });
+
+    _mucEventSubscription = _fxmpp.mucRoomEventStream.listen((mucEvent) {
+      setState(() {
+        _mucEvents.insert(0, mucEvent);
       });
     });
   }
@@ -228,6 +250,10 @@ class _MyHomePageState extends State<MyHomePage> {
     try {
       final success = await _fxmpp.sendMessage(messageXml);
       if (success) {
+        // Add the sent message to the local UI list
+        setState(() {
+          _messages.insert(0, messageXml);
+        });
         _messageController.clear();
         _showSnackBar('Message sent');
       } else {
@@ -266,6 +292,7 @@ class _MyHomePageState extends State<MyHomePage> {
     _messageSubscription?.cancel();
     _presenceSubscription?.cancel();
     _iqSubscription?.cancel();
+    _mucEventSubscription?.cancel();
     _fxmpp.dispose();
     super.dispose();
   }
@@ -278,7 +305,7 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: DefaultTabController(
-        length: 5,
+        length: 6,
         child: Column(
           children: [
             Container(
@@ -318,11 +345,13 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             const TabBar(
+              isScrollable: true,
               tabs: [
                 Tab(icon: Icon(Icons.settings), text: 'Connection'),
                 Tab(icon: Icon(Icons.message), text: 'Messages'),
                 Tab(icon: Icon(Icons.people), text: 'Presence'),
                 Tab(icon: Icon(Icons.help_outline), text: 'IQ'),
+                Tab(icon: Icon(Icons.group), text: 'MUC'),
                 Tab(icon: Icon(Icons.code), text: 'Utils'),
               ],
             ),
@@ -333,6 +362,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   _buildMessagesTab(),
                   _buildPresenceTab(),
                   _buildIqTab(),
+                  _buildMucTab(),
                   _buildUtilsTab(),
                 ],
               ),
@@ -841,6 +871,323 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  Widget _buildMucTab() {
+    return Column(
+      children: [
+        if (_connectionState.isConnected) ...[
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Multi-User Chat (MUC)',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                const SizedBox(height: 16),
+                
+                // Room Configuration
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Room Configuration',
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextField(
+                          controller: _roomJidController,
+                          decoration: const InputDecoration(
+                            labelText: 'Room JID (e.g., room@conference.server.com)',
+                            border: OutlineInputBorder(),
+                            isDense: true,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextField(
+                          controller: _nicknameController,
+                          decoration: const InputDecoration(
+                            labelText: 'Your Nickname',
+                            border: OutlineInputBorder(),
+                            isDense: true,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            ElevatedButton.icon(
+                              onPressed: _joinMucRoom,
+                              icon: const Icon(Icons.login, size: 16),
+                              label: const Text('Join Room'),
+                            ),
+                            ElevatedButton.icon(
+                              onPressed: _createMucRoom,
+                              icon: const Icon(Icons.add, size: 16),
+                              label: const Text('Create Room'),
+                            ),
+                            ElevatedButton.icon(
+                              onPressed: _leaveMucRoom,
+                              icon: const Icon(Icons.logout, size: 16),
+                              label: const Text('Leave Room'),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                
+                const SizedBox(height: 12),
+                
+                // Messaging
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Room Messaging',
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: _roomMessageController,
+                                decoration: const InputDecoration(
+                                  labelText: 'Group Message',
+                                  border: OutlineInputBorder(),
+                                  isDense: true,
+                                ),
+                                onSubmitted: (_) => _sendMucMessage(),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            ElevatedButton(
+                              onPressed: _sendMucMessage,
+                              child: const Text('Send'),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: _targetNicknameController,
+                                decoration: const InputDecoration(
+                                  labelText: 'Target Nickname',
+                                  border: OutlineInputBorder(),
+                                  isDense: true,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: TextField(
+                                controller: _privateMessageController,
+                                decoration: const InputDecoration(
+                                  labelText: 'Private Message',
+                                  border: OutlineInputBorder(),
+                                  isDense: true,
+                                ),
+                                onSubmitted: (_) => _sendMucPrivateMessage(),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            ElevatedButton(
+                              onPressed: _sendMucPrivateMessage,
+                              child: const Text('Private'),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                
+                const SizedBox(height: 12),
+                
+                // Participant Management
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Participant Management',
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 6,
+                          runSpacing: 6,
+                          children: [
+                            ElevatedButton(
+                              onPressed: _kickParticipant,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.orange,
+                                foregroundColor: Colors.white,
+                              ),
+                              child: const Text('Kick'),
+                            ),
+                            ElevatedButton(
+                              onPressed: _banUser,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.red,
+                                foregroundColor: Colors.white,
+                              ),
+                              child: const Text('Ban'),
+                            ),
+                            ElevatedButton(
+                              onPressed: _grantVoice,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green,
+                                foregroundColor: Colors.white,
+                              ),
+                              child: const Text('Grant Voice'),
+                            ),
+                            ElevatedButton(
+                              onPressed: _revokeVoice,
+                              child: const Text('Revoke Voice'),
+                            ),
+                            ElevatedButton(
+                              onPressed: _grantModerator,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.purple,
+                                foregroundColor: Colors.white,
+                              ),
+                              child: const Text('Moderator'),
+                            ),
+                            ElevatedButton(
+                              onPressed: _grantAdmin,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.indigo,
+                                foregroundColor: Colors.white,
+                              ),
+                              child: const Text('Admin'),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: _inviteUserController,
+                                decoration: const InputDecoration(
+                                  labelText: 'User JID to Invite',
+                                  border: OutlineInputBorder(),
+                                  isDense: true,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            ElevatedButton.icon(
+                              onPressed: _inviteUser,
+                              icon: const Icon(Icons.person_add, size: 16),
+                              label: const Text('Invite'),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        ElevatedButton.icon(
+                          onPressed: _destroyRoom,
+                          icon: const Icon(Icons.delete_forever, size: 16),
+                          label: const Text('Destroy Room'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red.shade700,
+                            foregroundColor: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Divider(),
+        ],
+        Expanded(
+          child: _mucEvents.isEmpty
+              ? const Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.group_outlined, size: 64, color: Colors.grey),
+                      SizedBox(height: 16),
+                      Text(
+                        'No MUC events yet',
+                        style: TextStyle(color: Colors.grey, fontSize: 16),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        'Join a room to see events',
+                        style: TextStyle(color: Colors.grey, fontSize: 12),
+                      ),
+                    ],
+                  ),
+                )
+              : ListView.builder(
+                  itemCount: _mucEvents.length,
+                  itemBuilder: (context, index) {
+                    final event = _mucEvents[index];
+                    final eventType = event.type.name;
+                    final roomJid = event.room.jid;
+                    final nickname = event.data?['nickname'] as String? ?? '';
+                    final message = event.data?['message'] as String? ?? '';
+                    
+                    return Card(
+                      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      child: ListTile(
+                        leading: Icon(
+                          _getMucEventIcon(eventType),
+                          color: _getMucEventColor(eventType),
+                        ),
+                        title: Text(
+                          _getMucEventTitle(eventType, nickname, roomJid),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (message.isNotEmpty) Text(message),
+                            Text(
+                              'Room: ${roomJid.split('@').first}',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                            Text(
+                              DateTime.now().toString().substring(11, 16),
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildUtilsTab() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
@@ -1199,5 +1546,371 @@ final id2 = Fxmpp.generateId('custom'); // Custom prefix''',
         ],
       ),
     );
+  }
+
+  // MUC Helper Methods
+  Future<void> _joinMucRoom() async {
+    if (_roomJidController.text.isEmpty || _nicknameController.text.isEmpty) {
+      _showSnackBar('Please enter room JID and nickname');
+      return;
+    }
+
+    try {
+      final success = await _fxmpp.joinMucRoom(
+        roomJid: _roomJidController.text,
+        nickname: _nicknameController.text,
+      );
+      if (success) {
+        _showSnackBar('Joined room: ${_roomJidController.text}');
+      } else {
+        _showSnackBar('Failed to join room');
+      }
+    } catch (e) {
+      _showSnackBar('Error joining room: $e');
+    }
+  }
+
+  Future<void> _createMucRoom() async {
+    if (_roomJidController.text.isEmpty || _nicknameController.text.isEmpty) {
+      _showSnackBar('Please enter room JID and nickname');
+      return;
+    }
+
+    try {
+      final success = await _fxmpp.createMucRoom(
+        roomJid: _roomJidController.text,
+        nickname: _nicknameController.text,
+      );
+      if (success) {
+        _showSnackBar('Created room: ${_roomJidController.text}');
+      } else {
+        _showSnackBar('Failed to create room');
+      }
+    } catch (e) {
+      _showSnackBar('Error creating room: $e');
+    }
+  }
+
+  Future<void> _leaveMucRoom() async {
+    if (_roomJidController.text.isEmpty) {
+      _showSnackBar('Please enter room JID');
+      return;
+    }
+
+    try {
+      final success = await _fxmpp.leaveMucRoom(roomJid: _roomJidController.text);
+      if (success) {
+        _showSnackBar('Left room: ${_roomJidController.text}');
+      } else {
+        _showSnackBar('Failed to leave room');
+      }
+    } catch (e) {
+      _showSnackBar('Error leaving room: $e');
+    }
+  }
+
+  Future<void> _sendMucMessage() async {
+    if (_roomJidController.text.isEmpty || _roomMessageController.text.isEmpty) {
+      _showSnackBar('Please enter room JID and message');
+      return;
+    }
+
+    try {
+      final mucMessage = Fxmpp.createMucMessage(
+        messageId: Fxmpp.generateId('muc'),
+        roomJid: _roomJidController.text,
+        fromJid: '${_usernameController.text}@${_domainController.text}',
+        message: _roomMessageController.text,
+      );
+      
+      final success = await _fxmpp.sendMucMessage(mucMessage);
+      if (success) {
+        // Add the sent MUC message to the local UI list
+        setState(() {
+          _messages.insert(0, mucMessage);
+        });
+        _roomMessageController.clear();
+        _showSnackBar('Group message sent');
+      } else {
+        _showSnackBar('Failed to send group message');
+      }
+    } catch (e) {
+      _showSnackBar('Error sending group message: $e');
+    }
+  }
+
+  Future<void> _sendMucPrivateMessage() async {
+    if (_roomJidController.text.isEmpty || 
+        _targetNicknameController.text.isEmpty || 
+        _privateMessageController.text.isEmpty) {
+      _showSnackBar('Please enter room JID, target nickname, and message');
+      return;
+    }
+
+    try {
+      final privateMessage = Fxmpp.createMucPrivateMessage(
+        messageId: Fxmpp.generateId('muc_private'),
+        roomJid: _roomJidController.text,
+        nickname: _targetNicknameController.text,
+        fromJid: '${_usernameController.text}@${_domainController.text}',
+        message: _privateMessageController.text,
+      );
+      
+      final success = await _fxmpp.sendMucPrivateMessage(privateMessage);
+      if (success) {
+        // Add the sent private message to the local UI list
+        setState(() {
+          _messages.insert(0, privateMessage);
+        });
+        _privateMessageController.clear();
+        _showSnackBar('Private message sent to ${_targetNicknameController.text}');
+      } else {
+        _showSnackBar('Failed to send private message');
+      }
+    } catch (e) {
+      _showSnackBar('Error sending private message: $e');
+    }
+  }
+
+  Future<void> _kickParticipant() async {
+    if (_roomJidController.text.isEmpty || _targetNicknameController.text.isEmpty) {
+      _showSnackBar('Please enter room JID and target nickname');
+      return;
+    }
+
+    try {
+      final success = await _fxmpp.kickMucParticipant(
+        roomJid: _roomJidController.text,
+        nickname: _targetNicknameController.text,
+        reason: 'Kicked by ${_nicknameController.text}',
+      );
+      if (success) {
+        _showSnackBar('Kicked ${_targetNicknameController.text}');
+      } else {
+        _showSnackBar('Failed to kick participant');
+      }
+    } catch (e) {
+      _showSnackBar('Error kicking participant: $e');
+    }
+  }
+
+  Future<void> _banUser() async {
+    if (_roomJidController.text.isEmpty || _inviteUserController.text.isEmpty) {
+      _showSnackBar('Please enter room JID and user JID to ban');
+      return;
+    }
+
+    try {
+      final success = await _fxmpp.banMucUser(
+        roomJid: _roomJidController.text,
+        userJid: _inviteUserController.text,
+        reason: 'Banned by ${_nicknameController.text}',
+      );
+      if (success) {
+        _showSnackBar('Banned ${_inviteUserController.text}');
+      } else {
+        _showSnackBar('Failed to ban user');
+      }
+    } catch (e) {
+      _showSnackBar('Error banning user: $e');
+    }
+  }
+
+  Future<void> _grantVoice() async {
+    if (_roomJidController.text.isEmpty || _targetNicknameController.text.isEmpty) {
+      _showSnackBar('Please enter room JID and target nickname');
+      return;
+    }
+
+    try {
+      final success = await _fxmpp.grantMucVoice(
+        roomJid: _roomJidController.text,
+        nickname: _targetNicknameController.text,
+      );
+      if (success) {
+        _showSnackBar('Granted voice to ${_targetNicknameController.text}');
+      } else {
+        _showSnackBar('Failed to grant voice');
+      }
+    } catch (e) {
+      _showSnackBar('Error granting voice: $e');
+    }
+  }
+
+  Future<void> _revokeVoice() async {
+    if (_roomJidController.text.isEmpty || _targetNicknameController.text.isEmpty) {
+      _showSnackBar('Please enter room JID and target nickname');
+      return;
+    }
+
+    try {
+      final success = await _fxmpp.revokeMucVoice(
+        roomJid: _roomJidController.text,
+        nickname: _targetNicknameController.text,
+      );
+      if (success) {
+        _showSnackBar('Revoked voice from ${_targetNicknameController.text}');
+      } else {
+        _showSnackBar('Failed to revoke voice');
+      }
+    } catch (e) {
+      _showSnackBar('Error revoking voice: $e');
+    }
+  }
+
+  Future<void> _grantModerator() async {
+    if (_roomJidController.text.isEmpty || _targetNicknameController.text.isEmpty) {
+      _showSnackBar('Please enter room JID and target nickname');
+      return;
+    }
+
+    try {
+      final success = await _fxmpp.grantMucModerator(
+        roomJid: _roomJidController.text,
+        nickname: _targetNicknameController.text,
+      );
+      if (success) {
+        _showSnackBar('Granted moderator to ${_targetNicknameController.text}');
+      } else {
+        _showSnackBar('Failed to grant moderator');
+      }
+    } catch (e) {
+      _showSnackBar('Error granting moderator: $e');
+    }
+  }
+
+  Future<void> _grantAdmin() async {
+    if (_roomJidController.text.isEmpty || _inviteUserController.text.isEmpty) {
+      _showSnackBar('Please enter room JID and user JID');
+      return;
+    }
+
+    try {
+      final success = await _fxmpp.grantMucAdmin(
+        roomJid: _roomJidController.text,
+        userJid: _inviteUserController.text,
+      );
+      if (success) {
+        _showSnackBar('Granted admin to ${_inviteUserController.text}');
+      } else {
+        _showSnackBar('Failed to grant admin');
+      }
+    } catch (e) {
+      _showSnackBar('Error granting admin: $e');
+    }
+  }
+
+  Future<void> _inviteUser() async {
+    if (_roomJidController.text.isEmpty || _inviteUserController.text.isEmpty) {
+      _showSnackBar('Please enter room JID and user JID to invite');
+      return;
+    }
+
+    try {
+      final success = await _fxmpp.inviteMucUser(
+        roomJid: _roomJidController.text,
+        userJid: _inviteUserController.text,
+        reason: 'Invited by ${_nicknameController.text}',
+      );
+      if (success) {
+        _showSnackBar('Invited ${_inviteUserController.text}');
+      } else {
+        _showSnackBar('Failed to invite user');
+      }
+    } catch (e) {
+      _showSnackBar('Error inviting user: $e');
+    }
+  }
+
+  Future<void> _destroyRoom() async {
+    if (_roomJidController.text.isEmpty) {
+      _showSnackBar('Please enter room JID');
+      return;
+    }
+
+    try {
+      final success = await _fxmpp.destroyMucRoom(
+        roomJid: _roomJidController.text,
+        reason: 'Room destroyed by ${_nicknameController.text}',
+      );
+      if (success) {
+        _showSnackBar('Destroyed room: ${_roomJidController.text}');
+      } else {
+        _showSnackBar('Failed to destroy room');
+      }
+    } catch (e) {
+      _showSnackBar('Error destroying room: $e');
+    }
+  }
+
+  // MUC Event Helper Methods
+  IconData _getMucEventIcon(String eventType) {
+    switch (eventType) {
+      case 'participantJoined':
+        return Icons.person_add;
+      case 'participantLeft':
+        return Icons.person_remove;
+      case 'messageReceived':
+        return Icons.message;
+      case 'subjectChanged':
+        return Icons.topic;
+      case 'roleChanged':
+        return Icons.admin_panel_settings;
+      case 'affiliationChanged':
+        return Icons.security;
+      case 'invitationReceived':
+        return Icons.mail;
+      case 'roomDestroyed':
+        return Icons.delete_forever;
+      default:
+        return Icons.info;
+    }
+  }
+
+  Color _getMucEventColor(String eventType) {
+    switch (eventType) {
+      case 'participantJoined':
+        return Colors.green;
+      case 'participantLeft':
+        return Colors.orange;
+      case 'messageReceived':
+        return Colors.blue;
+      case 'subjectChanged':
+        return Colors.purple;
+      case 'roleChanged':
+        return Colors.indigo;
+      case 'affiliationChanged':
+        return Colors.teal;
+      case 'invitationReceived':
+        return Colors.pink;
+      case 'roomDestroyed':
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  String _getMucEventTitle(String eventType, String nickname, String roomJid) {
+    final roomName = roomJid.split('@').first;
+    switch (eventType) {
+      case 'participantJoined':
+        return '$nickname joined $roomName';
+      case 'participantLeft':
+        return '$nickname left $roomName';
+      case 'messageReceived':
+        return 'Message from $nickname';
+      case 'subjectChanged':
+        return 'Subject changed by $nickname';
+      case 'roleChanged':
+        return 'Role changed for $nickname';
+      case 'affiliationChanged':
+        return 'Affiliation changed for $nickname';
+      case 'invitationReceived':
+        return 'Invitation from $nickname';
+      case 'roomDestroyed':
+        return 'Room $roomName destroyed';
+      default:
+        return 'MUC Event: $eventType';
+    }
   }
 }
