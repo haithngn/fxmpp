@@ -7,7 +7,6 @@ import 'models/muc_participant.dart';
 import 'models/muc_role.dart';
 import 'models/muc_affiliation.dart';
 import 'models/message_type.dart';
-import 'models/presence_type.dart';
 import 'models/iq_type.dart';
 
 /// Manager class for MUC (Multi-User Chat) operations
@@ -524,9 +523,9 @@ class MucManager {
       final room = _rooms[roomJid];
       if (room == null || !room.isJoined) return;
       
-      final body = message.findElements('body').firstOrNull?.text;
-      final subject = message.findElements('subject').firstOrNull?.text;
-      final thread = message.findElements('thread').firstOrNull?.text;
+      final body = message.findElements('body').firstOrNull?.value;
+      final subject = message.findElements('subject').firstOrNull?.value;
+      final thread = message.findElements('thread').firstOrNull?.value;
       
       final mucMessage = MucMessage(
         id: id ?? _generateId('msg'),
@@ -633,8 +632,8 @@ class MucManager {
     final affiliation = MucAffiliation.fromString(item.getAttribute('affiliation') ?? 'none');
     final realJid = item.getAttribute('jid');
     
-    final show = presence.findElements('show').firstOrNull?.text;
-    final status = presence.findElements('status').firstOrNull?.text;
+    final show = presence.findElements('show').firstOrNull?.value;
+    final status = presence.findElements('status').firstOrNull?.value;
     
     final participant = MucParticipant(
       nickname: nickname,

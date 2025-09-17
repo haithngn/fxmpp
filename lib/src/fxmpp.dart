@@ -10,9 +10,6 @@ import 'models/presence_type.dart';
 import 'models/iq_type.dart';
 import 'muc_manager.dart';
 import 'models/muc_room.dart';
-import 'models/muc_participant.dart';
-import 'models/muc_role.dart';
-import 'models/muc_affiliation.dart';
 
 /// Main FXMPP class for XMPP operations
 class Fxmpp {
