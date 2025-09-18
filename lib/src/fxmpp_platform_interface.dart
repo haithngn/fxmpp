@@ -1,9 +1,9 @@
+import 'package:fxmpp/src/core/xmpp_connection_config.dart';
+import 'package:fxmpp/src/core/xmpp_connection_state.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:xml/xml.dart';
 
 import 'fxmpp_method_channel.dart';
-import 'models/xmpp_connection_config.dart';
-import 'models/xmpp_connection_state.dart';
 
 abstract class FxmppPlatform extends PlatformInterface {
   /// Constructs a FxmppPlatform.
@@ -63,7 +63,8 @@ abstract class FxmppPlatform extends PlatformInterface {
 
   /// Set connection state callback
   void setConnectionStateCallback(Function(XmppConnectionState) callback) {
-    throw UnimplementedError('setConnectionStateCallback() has not been implemented.');
+    throw UnimplementedError(
+        'setConnectionStateCallback() has not been implemented.');
   }
 
   /// Set message callback
@@ -111,7 +112,8 @@ abstract class FxmppPlatform extends PlatformInterface {
 
   /// Send a private message to a room participant
   Future<bool> sendMucPrivateMessage(XmlDocument message) {
-    throw UnimplementedError('sendMucPrivateMessage() has not been implemented.');
+    throw UnimplementedError(
+        'sendMucPrivateMessage() has not been implemented.');
   }
 
   /// Change room subject/topic

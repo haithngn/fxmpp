@@ -2,19 +2,19 @@
 enum MessageType {
   /// Normal message (default)
   normal,
-  
+
   /// Chat message (one-to-one conversation)
   chat,
-  
+
   /// Group chat message
   groupchat,
-  
+
   /// Headline message (news, alerts)
   headline,
-  
+
   /// Error message
   error;
-  
+
   /// Convert enum to string value for XML
   String get value {
     switch (this) {

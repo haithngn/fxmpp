@@ -1,15 +1,15 @@
 import 'dart:async';
 import 'dart:developer';
+import 'package:fxmpp/src/core/iq_type.dart';
+import 'package:fxmpp/src/core/message_type.dart';
+import 'package:fxmpp/src/core/muc_room.dart';
+import 'package:fxmpp/src/core/presence_type.dart';
+import 'package:fxmpp/src/core/xmpp_connection_config.dart';
+import 'package:fxmpp/src/core/xmpp_connection_state.dart';
 import 'package:xml/xml.dart';
-
 import 'fxmpp_platform_interface.dart';
-import 'models/xmpp_connection_config.dart';
-import 'models/xmpp_connection_state.dart';
-import 'models/message_type.dart';
-import 'models/presence_type.dart';
-import 'models/iq_type.dart';
+
 import 'muc_manager.dart';
-import 'models/muc_room.dart';
 
 /// Main FXMPP class for XMPP operations
 class Fxmpp {
@@ -53,7 +53,8 @@ class Fxmpp {
   Stream<MucRoomEvent> get mucRoomEventStream => _mucManager.roomEventStream;
 
   /// Stream of MUC participant events
-  Stream<MucParticipantEvent> get mucParticipantEventStream => _mucManager.participantEventStream;
+  Stream<MucParticipantEvent> get mucParticipantEventStream =>
+      _mucManager.participantEventStream;
 
   /// Stream of MUC messages
   Stream<MucMessage> get mucMessageStream => _mucManager.mucMessageStream;
@@ -150,7 +151,7 @@ class Fxmpp {
   // ============================================================================
 
   /// Create a basic message stanza
-  /// 
+  ///
   /// [messageId] - Unique identifier for the message
   /// [type] - Type of message (chat, groupchat, normal, etc.)
   /// [fromJid] - Sender's JID
@@ -187,7 +188,7 @@ class Fxmpp {
   }
 
   /// Create a basic presence stanza
-  /// 
+  ///
   /// [presenceId] - Optional unique identifier for the presence
   /// [type] - Type of presence (available, unavailable, subscribe, etc.)
   /// [fromJid] - Sender's JID
@@ -209,19 +210,19 @@ class Fxmpp {
       'xmlns': 'jabber:client',
       'from': fromJid,
     };
-    
+
     if (presenceId != null) {
       attributes['id'] = presenceId;
     }
-    
+
     if (type.value != null) {
       attributes['type'] = type.value!;
     }
-    
+
     if (toJid != null) {
       attributes['to'] = toJid;
     }
-    
+
     builder.element('presence', attributes: attributes, nest: () {
       if (show.value != null) {
         builder.element('show', nest: show.value!);
@@ -237,7 +238,7 @@ class Fxmpp {
   }
 
   /// Create a basic IQ stanza
-  /// 
+  ///
   /// [iqId] - Unique identifier for the IQ
   /// [type] - Type of IQ (get, set, result, error)
   /// [fromJid] - Sender's JID
@@ -259,18 +260,18 @@ class Fxmpp {
       'to': toJid,
     }, nest: () {
       if (queryElement != null) {
-        builder.element(queryElement.name.local, 
-          attributes: Map.fromEntries(queryElement.attributes.map((attr) => 
-            MapEntry(attr.name.local, attr.value))),
-          nest: () {
-            for (final child in queryElement.children) {
-              if (child is XmlElement) {
-                _addElementRecursively(builder, child);
-              } else if (child is XmlText) {
-                builder.text(child.value);
-              }
+        builder.element(queryElement.name.local,
+            attributes: Map.fromEntries(queryElement.attributes
+                .map((attr) => MapEntry(attr.name.local, attr.value))),
+            nest: () {
+          for (final child in queryElement.children) {
+            if (child is XmlElement) {
+              _addElementRecursively(builder, child);
+            } else if (child is XmlText) {
+              builder.text(child.value);
             }
-          });
+          }
+        });
       }
     });
     return builder.buildDocument();
@@ -279,21 +280,20 @@ class Fxmpp {
   /// Helper method to recursively add XML elements
   static void _addElementRecursively(XmlBuilder builder, XmlElement element) {
     builder.element(element.name.local,
-      attributes: Map.fromEntries(element.attributes.map((attr) => 
-        MapEntry(attr.name.local, attr.value))),
-      nest: () {
-        for (final child in element.children) {
-          if (child is XmlElement) {
-            _addElementRecursively(builder, child);
-          } else if (child is XmlText) {
-            builder.text(child.value);
-          }
+        attributes: Map.fromEntries(element.attributes
+            .map((attr) => MapEntry(attr.name.local, attr.value))), nest: () {
+      for (final child in element.children) {
+        if (child is XmlElement) {
+          _addElementRecursively(builder, child);
+        } else if (child is XmlText) {
+          builder.text(child.value);
         }
-      });
+      }
+    });
   }
 
   /// Create a disco#info IQ query
-  /// 
+  ///
   /// [iqId] - Unique identifier for the IQ
   /// [fromJid] - Sender's JID
   /// [toJid] - Target JID to query
@@ -324,7 +324,7 @@ class Fxmpp {
   }
 
   /// Create a version IQ query
-  /// 
+  ///
   /// [iqId] - Unique identifier for the IQ
   /// [fromJid] - Sender's JID
   /// [toJid] - Target JID to query
@@ -349,7 +349,7 @@ class Fxmpp {
   }
 
   /// Create a time IQ query
-  /// 
+  ///
   /// [iqId] - Unique identifier for the IQ
   /// [fromJid] - Sender's JID
   /// [toJid] - Target JID to query
@@ -374,7 +374,7 @@ class Fxmpp {
   }
 
   /// Generate a unique ID for stanzas
-  /// 
+  ///
   /// [prefix] - Optional prefix for the ID
   static String generateId([String prefix = 'fxmpp']) {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
@@ -383,7 +383,7 @@ class Fxmpp {
   }
 
   /// Create a MUC room message stanza (groupchat type)
-  /// 
+  ///
   /// [messageId] - Unique identifier for the message
   /// [roomJid] - The JID of the room
   /// [fromJid] - Sender's JID
@@ -418,7 +418,7 @@ class Fxmpp {
   }
 
   /// Create a MUC private message stanza (chat type to participant)
-  /// 
+  ///
   /// [messageId] - Unique identifier for the message
   /// [roomJid] - The JID of the room
   /// [nickname] - The nickname of the participant
@@ -454,7 +454,7 @@ class Fxmpp {
   // ============================================================================
 
   /// Join a MUC room
-  /// 
+  ///
   /// [roomJid] - The JID of the room to join (room@server)
   /// [nickname] - The nickname to use in the room
   /// [password] - Optional room password
@@ -478,7 +478,7 @@ class Fxmpp {
   }
 
   /// Leave a MUC room
-  /// 
+  ///
   /// [roomJid] - The JID of the room to leave
   /// [reason] - Optional reason for leaving
   Future<bool> leaveMucRoom({
@@ -493,7 +493,7 @@ class Fxmpp {
   }
 
   /// Create a new MUC room
-  /// 
+  ///
   /// [roomJid] - The JID of the room to create (room@server)
   /// [nickname] - The nickname to use in the room
   /// [password] - Optional room password
@@ -511,7 +511,7 @@ class Fxmpp {
   }
 
   /// Send a message to a MUC room
-  /// 
+  ///
   /// [message] - The XML document representing the message stanza
   Future<bool> sendMucMessage(XmlDocument message) async {
     log("[XMPP-MUC] >>> ${message.toXmlString()}");
@@ -519,7 +519,7 @@ class Fxmpp {
   }
 
   /// Send a private message to a room participant
-  /// 
+  ///
   /// [message] - The XML document representing the private message stanza
   Future<bool> sendMucPrivateMessage(XmlDocument message) async {
     log("[XMPP-MUC-Private] >>> ${message.toXmlString()}");
@@ -527,7 +527,7 @@ class Fxmpp {
   }
 
   /// Change room subject/topic
-  /// 
+  ///
   /// [roomJid] - The JID of the room
   /// [subject] - The new subject
   Future<bool> changeMucSubject({
@@ -542,7 +542,7 @@ class Fxmpp {
   }
 
   /// Kick a participant from the room
-  /// 
+  ///
   /// [roomJid] - The JID of the room
   /// [nickname] - The nickname of the participant to kick
   /// [reason] - Optional reason for kicking
@@ -560,7 +560,7 @@ class Fxmpp {
   }
 
   /// Ban a user from the room
-  /// 
+  ///
   /// [roomJid] - The JID of the room
   /// [userJid] - The JID of the user to ban
   /// [reason] - Optional reason for banning
@@ -578,7 +578,7 @@ class Fxmpp {
   }
 
   /// Grant voice to a participant (make them participant)
-  /// 
+  ///
   /// [roomJid] - The JID of the room
   /// [nickname] - The nickname of the participant
   /// [reason] - Optional reason
@@ -596,7 +596,7 @@ class Fxmpp {
   }
 
   /// Revoke voice from a participant (make them visitor)
-  /// 
+  ///
   /// [roomJid] - The JID of the room
   /// [nickname] - The nickname of the participant
   /// [reason] - Optional reason
@@ -614,7 +614,7 @@ class Fxmpp {
   }
 
   /// Grant moderator privileges to a participant
-  /// 
+  ///
   /// [roomJid] - The JID of the room
   /// [nickname] - The nickname of the participant
   /// [reason] - Optional reason
@@ -632,7 +632,7 @@ class Fxmpp {
   }
 
   /// Grant membership to a user
-  /// 
+  ///
   /// [roomJid] - The JID of the room
   /// [userJid] - The JID of the user to make member
   /// [reason] - Optional reason
@@ -650,7 +650,7 @@ class Fxmpp {
   }
 
   /// Grant admin privileges to a user
-  /// 
+  ///
   /// [roomJid] - The JID of the room
   /// [userJid] - The JID of the user to make admin
   /// [reason] - Optional reason
@@ -668,7 +668,7 @@ class Fxmpp {
   }
 
   /// Invite a user to the room
-  /// 
+  ///
   /// [roomJid] - The JID of the room
   /// [userJid] - The JID of the user to invite
   /// [reason] - Optional invitation message
@@ -686,7 +686,7 @@ class Fxmpp {
   }
 
   /// Destroy a room (owner only)
-  /// 
+  ///
   /// [roomJid] - The JID of the room to destroy
   /// [reason] - Optional reason for destruction
   /// [alternativeRoom] - Optional alternative room JID

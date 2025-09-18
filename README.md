@@ -6,21 +6,18 @@ A Flutter plugin for XMPP (Extensible Messaging and Presence Protocol) communica
 
 ## Features
 
-- ✅ Cross-platform support (iOS and Android)
-- ✅ Real-time messaging
-- ✅ Presence management
-- ✅ IQ (Info/Query) stanza support
-- ✅ Connection state monitoring
-- ✅ SSL/TLS encryption support
+- ✅ Minimal dependencies (xml(Dart), [Smack](https://github.com/igniterealtime/Smack) for Android, [XMPPFramework](https://github.com/robbiehanson/XMPPFramework) for iOS)
+- ✅ Pure XMPP interpreter.
+- ✅ Easy to customize.
 - ✅ Stream-based architecture
-- ✅ Comprehensive example app
 
-## Platform Support
+### Built-in Stanza Builders
 
-| Platform | Implementation |
-|----------|----------------|
-| iOS      | XMPPFramework  |
-| Android  | Smack Library  |
+- Core XMPP Stanzas(IQ, Message, Presence).
+- [XEP-0012 Last Activity](https://xmpp.org/extensions/xep-0012.html)
+- [XEP-0085 Chat State Notifications](https://xmpp.org/extensions/xep-0085.html)
+- [XEP-0184 Message Delivery Receipts](https://xmpp.org/extensions/xep-0184.html)
+- [XEP-0313 Message Archive Management](https://xmpp.org/extensions/xep-0313.html)
 
 ## Installation
 
@@ -28,7 +25,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  fxmpp: ^1.0.0-alpha.2
+  fxmpp: ^1.0.0
 ```
 
 Then run:
@@ -114,7 +111,7 @@ try {
 ```
 
 ### Sending Messages
-
+#### Using built-in message builder
 ```dart
 final message = XmppMessage(
   id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -129,6 +126,20 @@ final success = await _fxmpp.sendMessage(message);
 if (success) {
   print('Message sent successfully');
 }
+```
+#### Using XML builder
+```dart
+import 'package:xml/xml.dart';
+
+final builder = XmlBuilder();
+builder.element('message', nest: () {
+   builder.attribute('type', 'chat');
+   builder.attribute('to', 'recipient@domain.com');
+   builder.attribute('id', 'message_${DateTime.now().millisecondsSinceEpoch}');
+   builder.element('body', nest: 'content');
+};
+
+await _fxmpp.sendMessage(builder.buildDocument());
 ```
 
 ### Sending IQ Stanzas
@@ -176,101 +187,6 @@ if (success) {
 await _fxmpp.disconnect();
 ```
 
-## API Reference
-
-### Classes
-
-#### `Fxmpp`
-Main class for XMPP operations.
-
-**Methods:**
-- `initialize()` - Initialize the plugin
-- `connect(XmppConnectionConfig config)` - Connect to XMPP server
-- `disconnect()` - Disconnect from server
-- `sendMessage(XmppMessage message)` - Send a message
-- `sendPresence(XmppPresence presence)` - Send presence update
-- `sendIq(XmlDocument iq)` - Send an IQ stanza
-- `getConnectionState()` - Get current connection state
-- `dispose()` - Clean up resources
-
-**Streams:**
-- `connectionStateStream` - Stream of connection state changes
-- `messageStream` - Stream of incoming messages
-- `presenceStream` - Stream of presence updates
-- `iqStream` - Stream of incoming IQ stanzas
-
-#### `XmppConnectionConfig`
-Configuration for XMPP connection.
-
-**Properties:**
-- `host` - XMPP server hostname
-- `port` - Server port (default: 5222)
-- `username` - Username for authentication
-- `password` - Password for authentication
-- `domain` - XMPP domain
-- `useSSL` - Enable SSL/TLS (default: true)
-- `allowSelfSignedCertificates` - Allow self-signed certificates (default: false)
-- `resource` - Client resource identifier
-
-#### `XmppMessage`
-Represents an XMPP message.
-
-**Properties:**
-- `id` - Unique message identifier
-- `from` - Sender JID
-- `to` - Recipient JID
-- `body` - Message content
-- `timestamp` - Message timestamp
-- `type` - Message type (chat, groupchat, etc.)
-- `extensions` - Additional message data
-
-#### `XmppPresence`
-Represents XMPP presence information.
-
-**Properties:**
-- `from` - Sender JID
-- `to` - Target JID (optional)
-- `type` - Presence type
-- `show` - Presence show value
-- `status` - Status message
-- `priority` - Presence priority
-- `timestamp` - Presence timestamp
-
-### Enums
-
-#### `XmppConnectionState`
-- `disconnected` - Not connected
-- `connecting` - Connection in progress
-- `connected` - Connected and authenticated
-- `disconnecting` - Disconnection in progress
-- `error` - Connection error
-- `authenticationFailed` - Authentication failed
-- `connectionLost` - Connection lost unexpectedly
-
-#### `XmppMessageType`
-- `chat` - One-to-one chat message
-- `groupchat` - Group chat message
-- `headline` - Headline message
-- `normal` - Normal message
-- `error` - Error message
-
-#### `XmppPresenceType`
-- `available` - Available presence
-- `unavailable` - Unavailable presence
-- `subscribe` - Subscription request
-- `subscribed` - Subscription approved
-- `unsubscribe` - Unsubscription request
-- `unsubscribed` - Unsubscription approved
-- `probe` - Presence probe
-- `error` - Presence error
-
-#### `XmppPresenceShow`
-- `online` - Online/available
-- `away` - Away
-- `chat` - Available for chat
-- `dnd` - Do not disturb
-- `xa` - Extended away
-
 ## Example App
 
 The package includes a comprehensive example app that demonstrates all features. To run the example:
@@ -308,33 +224,6 @@ Required permissions are automatically added to your app's `AndroidManifest.xml`
 - Store credentials securely (consider using flutter_secure_storage)
 - Validate all incoming messages and presence updates
 
-## Troubleshooting
-
-### Common Issues
-
-1. **Connection fails with SSL errors**
-   - Ensure your XMPP server supports SSL/TLS
-   - Check if the server certificate is valid
-   - For testing only, you can set `allowSelfSignedCertificates: true`
-
-2. **Authentication fails**
-   - Verify username and password are correct
-   - Ensure the user account exists on the XMPP server
-   - Check if the domain is correct
-
-3. **Messages not being received**
-   - Ensure you're listening to the `messageStream`
-   - Check if the connection is in `connected` state
-   - Verify the recipient JID is correct
-
-4. **iOS build issues**
-   - Run `cd ios && pod install` in your app directory
-   - Clean and rebuild your project
-
-5. **Android build issues**
-   - Ensure your `minSdkVersion` is at least 16
-   - Clean and rebuild your project
-
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
@@ -347,64 +236,14 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 For issues and questions, please use the [GitHub Issues](https://github.com/haithngn/fxmpp/issues) page.
 
-### Multi-User Chat (MUC) Support
-
-FXMPP supports Multi-User Chat (MUC) functionality for group conversations:
-
-```dart
-// Join a MUC room
-await _fxmpp.joinMucRoom(
-  roomJid: 'room@conference.example.com',
-  nickname: 'MyNickname',
-  password: 'optional-password', // optional
-);
-
-// Send a message to the room
-final mucMessage = Fxmpp.createMucMessage(
-  messageId: Fxmpp.generateId('muc'),
-  roomJid: 'room@conference.example.com',
-  fromJid: 'user@example.com',
-  message: 'Hello everyone!',
-);
-await _fxmpp.sendMucMessage(mucMessage);
-
-// Send a private message to a room participant
-final privateMessage = Fxmpp.createMucPrivateMessage(
-  messageId: Fxmpp.generateId('muc_private'),
-  roomJid: 'room@conference.example.com',
-  nickname: 'TargetUser',
-  fromJid: 'user@example.com',
-  message: 'Private message',
-);
-await _fxmpp.sendMucPrivateMessage(privateMessage);
-
-// Leave the room
-await _fxmpp.leaveMucRoom(
-  roomJid: 'room@conference.example.com',
-  reason: 'Goodbye!', // optional
-);
-
-// Listen to MUC events
-_fxmpp.mucRoomEventStream.listen((event) {
-  print('MUC room event: ${event.type}');
-});
-
-_fxmpp.mucParticipantEventStream.listen((event) {
-  print('Participant event: ${event.type}');
-});
-
-_fxmpp.mucMessageStream.listen((message) {
-  print('MUC message: ${message.body}');
-});
-```
-
 ## Changelog
+### 1.0.0
+- Core XMPP Features.
+- MUC.
+- Stanza Builders: IQ, Message, Presence, XEP-0012, XEP-0085, XEP-0184, XEP-0313.
 
 ### 1.0.0-alpha.2
-- **BREAKING**: Refactored MUC API for consistency with other stanza methods
-- Added `Fxmpp.createMucMessage()` and `Fxmpp.createMucPrivateMessage()` utility methods
-- Updated MUC methods to accept `XmlDocument` objects instead of primitive types
-- Enhanced example app with updated MUC usage
+- **BREAKING**: Support MUC.
 
 ### 1.0.0-alpha
 - Added IQ (Info/Query) stanza support

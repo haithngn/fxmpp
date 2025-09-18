@@ -6,40 +6,40 @@ import 'muc_affiliation.dart';
 class MucRoom {
   /// The room's JID (room@server)
   final String jid;
-  
+
   /// The room's human-readable name
   final String? name;
-  
+
   /// The room's description
   final String? description;
-  
+
   /// The room's subject/topic
   final String? subject;
-  
+
   /// The user's nickname in this room
   final String? userNickname;
-  
+
   /// The user's role in this room
   final MucRole? userRole;
-  
+
   /// The user's affiliation with this room
   final MucAffiliation? userAffiliation;
-  
+
   /// Whether the user has joined this room
   final bool isJoined;
-  
+
   /// List of participants currently in the room
   final List<MucParticipant> participants;
-  
+
   /// Room configuration options
   final MucRoomConfig config;
-  
+
   /// When the user joined this room
   final DateTime? joinedAt;
-  
+
   /// The maximum number of occupants allowed
   final int? maxOccupants;
-  
+
   /// Number of current occupants
   final int occupantCount;
 
@@ -145,20 +145,21 @@ class MucRoom {
       description: map['description'] as String?,
       subject: map['subject'] as String?,
       userNickname: map['userNickname'] as String?,
-      userRole: map['userRole'] != null 
+      userRole: map['userRole'] != null
           ? MucRole.fromString(map['userRole'] as String)
           : null,
-      userAffiliation: map['userAffiliation'] != null 
+      userAffiliation: map['userAffiliation'] != null
           ? MucAffiliation.fromString(map['userAffiliation'] as String)
           : null,
       isJoined: map['isJoined'] as bool? ?? false,
       participants: (map['participants'] as List<dynamic>?)
-          ?.map((p) => MucParticipant.fromMap(p as Map<String, dynamic>))
-          .toList() ?? [],
-      config: map['config'] != null 
+              ?.map((p) => MucParticipant.fromMap(p as Map<String, dynamic>))
+              .toList() ??
+          [],
+      config: map['config'] != null
           ? MucRoomConfig.fromMap(map['config'] as Map<String, dynamic>)
           : const MucRoomConfig(),
-      joinedAt: map['joinedAt'] != null 
+      joinedAt: map['joinedAt'] != null
           ? DateTime.fromMillisecondsSinceEpoch(map['joinedAt'] as int)
           : null,
       maxOccupants: map['maxOccupants'] as int?,
@@ -185,28 +186,28 @@ class MucRoom {
 class MucRoomConfig {
   /// Whether the room is password protected
   final bool isPasswordProtected;
-  
+
   /// Whether the room is members-only
   final bool isMembersOnly;
-  
+
   /// Whether the room is moderated
   final bool isModerated;
-  
+
   /// Whether the room is persistent
   final bool isPersistent;
-  
+
   /// Whether the room is public (discoverable)
   final bool isPublic;
-  
+
   /// Whether participants can invite others
   final bool allowInvites;
-  
+
   /// Whether participants can change the subject
   final bool allowSubjectChange;
-  
+
   /// Whether real JIDs are visible to participants
   final bool showRealJids;
-  
+
   /// Whether the room logs conversations
   final bool isLogged;
 

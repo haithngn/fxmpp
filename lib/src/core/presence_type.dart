@@ -2,28 +2,28 @@
 enum PresenceType {
   /// Available presence (default, no type attribute)
   available,
-  
+
   /// Unavailable presence
   unavailable,
-  
+
   /// Subscribe to someone's presence
   subscribe,
-  
+
   /// Unsubscribe from someone's presence
   unsubscribe,
-  
+
   /// Subscribed confirmation
   subscribed,
-  
+
   /// Unsubscribed confirmation
   unsubscribed,
-  
+
   /// Probe for presence
   probe,
-  
+
   /// Error presence
   error;
-  
+
   /// Convert enum to string value for XML (null for available)
   String? get value {
     switch (this) {
@@ -51,19 +51,19 @@ enum PresenceType {
 enum PresenceShow {
   /// Available (default, no show element)
   available,
-  
+
   /// Away
   away,
-  
+
   /// Extended away
   xa,
-  
+
   /// Do not disturb
   dnd,
-  
+
   /// Free for chat
   chat;
-  
+
   /// Convert enum to string value for XML (null for available)
   String? get value {
     switch (this) {

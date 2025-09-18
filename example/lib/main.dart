@@ -49,7 +49,7 @@ class _MyHomePageState extends State<MyHomePage> {
       TextEditingController(text: 'Hello, user2!');
   final TextEditingController _recipientController =
       TextEditingController(text: 'user2@localhost');
-  
+
   // MUC-related controllers
   final TextEditingController _roomJidController =
       TextEditingController(text: 'testroom@conference.localhost');
@@ -261,7 +261,7 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     } catch (e) {
       _showSnackBar('Error sending message: $e');
-      print('FXMPP Debug: Send error: $e');
+      log('FXMPP Debug: Send error: $e');
     }
   }
 
@@ -887,7 +887,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                 ),
                 const SizedBox(height: 16),
-                
+
                 // Room Configuration
                 Card(
                   child: Padding(
@@ -897,15 +897,17 @@ class _MyHomePageState extends State<MyHomePage> {
                       children: [
                         Text(
                           'Room Configuration',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                         ),
                         const SizedBox(height: 8),
                         TextField(
                           controller: _roomJidController,
                           decoration: const InputDecoration(
-                            labelText: 'Room JID (e.g., room@conference.server.com)',
+                            labelText:
+                                'Room JID (e.g., room@conference.server.com)',
                             border: OutlineInputBorder(),
                             isDense: true,
                           ),
@@ -945,9 +947,9 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 12),
-                
+
                 // Messaging
                 Card(
                   child: Padding(
@@ -957,9 +959,10 @@ class _MyHomePageState extends State<MyHomePage> {
                       children: [
                         Text(
                           'Room Messaging',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                         ),
                         const SizedBox(height: 8),
                         Row(
@@ -1018,9 +1021,9 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 12),
-                
+
                 // Participant Management
                 Card(
                   child: Padding(
@@ -1030,9 +1033,10 @@ class _MyHomePageState extends State<MyHomePage> {
                       children: [
                         Text(
                           'Participant Management',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                         ),
                         const SizedBox(height: 8),
                         Wrap(
@@ -1153,9 +1157,10 @@ class _MyHomePageState extends State<MyHomePage> {
                     final roomJid = event.room.jid;
                     final nickname = event.data?['nickname'] as String? ?? '';
                     final message = event.data?['message'] as String? ?? '';
-                    
+
                     return Card(
-                      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
                       child: ListTile(
                         leading: Icon(
                           _getMucEventIcon(eventType),
@@ -1598,7 +1603,8 @@ final id2 = Fxmpp.generateId('custom'); // Custom prefix''',
     }
 
     try {
-      final success = await _fxmpp.leaveMucRoom(roomJid: _roomJidController.text);
+      final success =
+          await _fxmpp.leaveMucRoom(roomJid: _roomJidController.text);
       if (success) {
         _showSnackBar('Left room: ${_roomJidController.text}');
       } else {
@@ -1610,7 +1616,8 @@ final id2 = Fxmpp.generateId('custom'); // Custom prefix''',
   }
 
   Future<void> _sendMucMessage() async {
-    if (_roomJidController.text.isEmpty || _roomMessageController.text.isEmpty) {
+    if (_roomJidController.text.isEmpty ||
+        _roomMessageController.text.isEmpty) {
       _showSnackBar('Please enter room JID and message');
       return;
     }
@@ -1622,7 +1629,7 @@ final id2 = Fxmpp.generateId('custom'); // Custom prefix''',
         fromJid: '${_usernameController.text}@${_domainController.text}',
         message: _roomMessageController.text,
       );
-      
+
       final success = await _fxmpp.sendMucMessage(mucMessage);
       if (success) {
         // Add the sent MUC message to the local UI list
@@ -1640,8 +1647,8 @@ final id2 = Fxmpp.generateId('custom'); // Custom prefix''',
   }
 
   Future<void> _sendMucPrivateMessage() async {
-    if (_roomJidController.text.isEmpty || 
-        _targetNicknameController.text.isEmpty || 
+    if (_roomJidController.text.isEmpty ||
+        _targetNicknameController.text.isEmpty ||
         _privateMessageController.text.isEmpty) {
       _showSnackBar('Please enter room JID, target nickname, and message');
       return;
@@ -1655,7 +1662,7 @@ final id2 = Fxmpp.generateId('custom'); // Custom prefix''',
         fromJid: '${_usernameController.text}@${_domainController.text}',
         message: _privateMessageController.text,
       );
-      
+
       final success = await _fxmpp.sendMucPrivateMessage(privateMessage);
       if (success) {
         // Add the sent private message to the local UI list
@@ -1663,7 +1670,8 @@ final id2 = Fxmpp.generateId('custom'); // Custom prefix''',
           _messages.insert(0, privateMessage);
         });
         _privateMessageController.clear();
-        _showSnackBar('Private message sent to ${_targetNicknameController.text}');
+        _showSnackBar(
+            'Private message sent to ${_targetNicknameController.text}');
       } else {
         _showSnackBar('Failed to send private message');
       }
@@ -1673,7 +1681,8 @@ final id2 = Fxmpp.generateId('custom'); // Custom prefix''',
   }
 
   Future<void> _kickParticipant() async {
-    if (_roomJidController.text.isEmpty || _targetNicknameController.text.isEmpty) {
+    if (_roomJidController.text.isEmpty ||
+        _targetNicknameController.text.isEmpty) {
       _showSnackBar('Please enter room JID and target nickname');
       return;
     }
@@ -1717,7 +1726,8 @@ final id2 = Fxmpp.generateId('custom'); // Custom prefix''',
   }
 
   Future<void> _grantVoice() async {
-    if (_roomJidController.text.isEmpty || _targetNicknameController.text.isEmpty) {
+    if (_roomJidController.text.isEmpty ||
+        _targetNicknameController.text.isEmpty) {
       _showSnackBar('Please enter room JID and target nickname');
       return;
     }
@@ -1738,7 +1748,8 @@ final id2 = Fxmpp.generateId('custom'); // Custom prefix''',
   }
 
   Future<void> _revokeVoice() async {
-    if (_roomJidController.text.isEmpty || _targetNicknameController.text.isEmpty) {
+    if (_roomJidController.text.isEmpty ||
+        _targetNicknameController.text.isEmpty) {
       _showSnackBar('Please enter room JID and target nickname');
       return;
     }
@@ -1759,7 +1770,8 @@ final id2 = Fxmpp.generateId('custom'); // Custom prefix''',
   }
 
   Future<void> _grantModerator() async {
-    if (_roomJidController.text.isEmpty || _targetNicknameController.text.isEmpty) {
+    if (_roomJidController.text.isEmpty ||
+        _targetNicknameController.text.isEmpty) {
       _showSnackBar('Please enter room JID and target nickname');
       return;
     }

@@ -2,16 +2,16 @@
 enum IqType {
   /// Get request
   get,
-  
+
   /// Set request
   set,
-  
+
   /// Result response
   result,
-  
+
   /// Error response
   error;
-  
+
   /// Convert enum to string value for XML
   String get value {
     switch (this) {

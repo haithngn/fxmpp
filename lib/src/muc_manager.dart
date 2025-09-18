@@ -1,54 +1,55 @@
 import 'dart:async';
 import 'dart:developer';
+import 'package:fxmpp/src/core/iq_type.dart';
+import 'package:fxmpp/src/core/message_type.dart';
+import 'package:fxmpp/src/core/muc_affiliation.dart';
+import 'package:fxmpp/src/core/muc_participant.dart';
+import 'package:fxmpp/src/core/muc_role.dart';
+import 'package:fxmpp/src/core/muc_room.dart';
 import 'package:xml/xml.dart';
-
-import 'models/muc_room.dart';
-import 'models/muc_participant.dart';
-import 'models/muc_role.dart';
-import 'models/muc_affiliation.dart';
-import 'models/message_type.dart';
-import 'models/iq_type.dart';
 
 /// Manager class for MUC (Multi-User Chat) operations
 class MucManager {
   /// Map of joined rooms by JID
   final Map<String, MucRoom> _rooms = {};
-  
+
   /// Stream controller for room events
   final StreamController<MucRoomEvent> _roomEventController =
       StreamController<MucRoomEvent>.broadcast();
-  
+
   /// Stream controller for participant events
   final StreamController<MucParticipantEvent> _participantEventController =
       StreamController<MucParticipantEvent>.broadcast();
-  
+
   /// Stream controller for MUC messages
   final StreamController<MucMessage> _mucMessageController =
       StreamController<MucMessage>.broadcast();
 
   /// Stream of room events (joined, left, created, etc.)
   Stream<MucRoomEvent> get roomEventStream => _roomEventController.stream;
-  
+
   /// Stream of participant events (joined, left, role changed, etc.)
-  Stream<MucParticipantEvent> get participantEventStream => _participantEventController.stream;
-  
+  Stream<MucParticipantEvent> get participantEventStream =>
+      _participantEventController.stream;
+
   /// Stream of MUC messages
   Stream<MucMessage> get mucMessageStream => _mucMessageController.stream;
 
   /// Get all joined rooms
-  List<MucRoom> get joinedRooms => _rooms.values.where((room) => room.isJoined).toList();
-  
+  List<MucRoom> get joinedRooms =>
+      _rooms.values.where((room) => room.isJoined).toList();
+
   /// Get all rooms (joined and not joined)
   List<MucRoom> get allRooms => _rooms.values.toList();
-  
+
   /// Get a room by JID
   MucRoom? getRoom(String roomJid) => _rooms[roomJid];
-  
+
   /// Check if user is in a room
   bool isInRoom(String roomJid) => _rooms[roomJid]?.isJoined ?? false;
 
   /// Create a new MUC room
-  /// 
+  ///
   /// [roomJid] - The JID of the room to create (room@server)
   /// [nickname] - The nickname to use in the room
   /// [config] - Optional room configuration
@@ -74,19 +75,19 @@ class MucManager {
         }
       });
     });
-    
+
     // Add room to local cache
     _rooms[roomJid] = MucRoom(
       jid: roomJid,
       userNickname: nickname,
       config: config ?? const MucRoomConfig(),
     );
-    
+
     return builder.buildDocument();
   }
 
   /// Join an existing MUC room
-  /// 
+  ///
   /// [roomJid] - The JID of the room to join (room@server)
   /// [nickname] - The nickname to use in the room
   /// [password] - Optional room password
@@ -112,7 +113,7 @@ class MucManager {
         if (password != null && password.isNotEmpty) {
           builder.element('password', nest: password);
         }
-        
+
         // History management
         if (maxStanzas != null || since != null) {
           builder.element('history', attributes: {
@@ -122,18 +123,18 @@ class MucManager {
         }
       });
     });
-    
+
     // Add or update room in local cache
     final existingRoom = _rooms[roomJid];
     _rooms[roomJid] = (existingRoom ?? MucRoom(jid: roomJid)).copyWith(
       userNickname: nickname,
     );
-    
+
     return builder.buildDocument();
   }
 
   /// Leave a MUC room
-  /// 
+  ///
   /// [roomJid] - The JID of the room to leave
   /// [reason] - Optional reason for leaving
   XmlDocument leaveRoom({
@@ -157,12 +158,12 @@ class MucManager {
         builder.element('status', nest: reason);
       }
     });
-    
+
     return builder.buildDocument();
   }
 
   /// Send a message to a MUC room
-  /// 
+  ///
   /// [roomJid] - The JID of the room
   /// [message] - The message content
   /// [subject] - Optional subject change
@@ -196,12 +197,12 @@ class MucManager {
         builder.element('thread', nest: thread);
       }
     });
-    
+
     return builder.buildDocument();
   }
 
   /// Send a private message to a room participant
-  /// 
+  ///
   /// [roomJid] - The JID of the room
   /// [nickname] - The nickname of the participant
   /// [message] - The message content
@@ -227,12 +228,12 @@ class MucManager {
     }, nest: () {
       builder.element('body', nest: message);
     });
-    
+
     return builder.buildDocument();
   }
 
   /// Change room subject/topic
-  /// 
+  ///
   /// [roomJid] - The JID of the room
   /// [subject] - The new subject
   XmlDocument changeRoomSubject({
@@ -256,12 +257,12 @@ class MucManager {
     }, nest: () {
       builder.element('subject', nest: subject);
     });
-    
+
     return builder.buildDocument();
   }
 
   /// Kick a participant from the room
-  /// 
+  ///
   /// [roomJid] - The JID of the room
   /// [nickname] - The nickname of the participant to kick
   /// [reason] - Optional reason for kicking
@@ -281,7 +282,7 @@ class MucManager {
   }
 
   /// Grant voice to a participant (make them participant)
-  /// 
+  ///
   /// [roomJid] - The JID of the room
   /// [nickname] - The nickname of the participant
   /// [reason] - Optional reason
@@ -301,7 +302,7 @@ class MucManager {
   }
 
   /// Revoke voice from a participant (make them visitor)
-  /// 
+  ///
   /// [roomJid] - The JID of the room
   /// [nickname] - The nickname of the participant
   /// [reason] - Optional reason
@@ -321,7 +322,7 @@ class MucManager {
   }
 
   /// Grant moderator privileges to a participant
-  /// 
+  ///
   /// [roomJid] - The JID of the room
   /// [nickname] - The nickname of the participant
   /// [reason] - Optional reason
@@ -341,7 +342,7 @@ class MucManager {
   }
 
   /// Ban a user from the room (set affiliation to outcast)
-  /// 
+  ///
   /// [roomJid] - The JID of the room
   /// [userJidToBan] - The real JID of the user to ban
   /// [reason] - Optional reason for banning
@@ -361,7 +362,7 @@ class MucManager {
   }
 
   /// Grant membership to a user
-  /// 
+  ///
   /// [roomJid] - The JID of the room
   /// [memberJid] - The JID of the user to make member
   /// [reason] - Optional reason
@@ -381,7 +382,7 @@ class MucManager {
   }
 
   /// Grant admin privileges to a user
-  /// 
+  ///
   /// [roomJid] - The JID of the room
   /// [adminJid] - The JID of the user to make admin
   /// [reason] - Optional reason
@@ -401,7 +402,7 @@ class MucManager {
   }
 
   /// Invite a user to the room
-  /// 
+  ///
   /// [roomJid] - The JID of the room
   /// [inviteeJid] - The JID of the user to invite
   /// [reason] - Optional invitation message
@@ -431,12 +432,12 @@ class MucManager {
         });
       });
     });
-    
+
     return builder.buildDocument();
   }
 
   /// Destroy a room (owner only)
-  /// 
+  ///
   /// [roomJid] - The JID of the room to destroy
   /// [reason] - Optional reason for destruction
   /// [alternativeRoom] - Optional alternative room JID
@@ -467,7 +468,7 @@ class MucManager {
         });
       });
     });
-    
+
     return builder.buildDocument();
   }
 
@@ -477,25 +478,27 @@ class MucManager {
       final presence = presenceDoc.rootElement;
       final from = presence.getAttribute('from');
       final type = presence.getAttribute('type');
-      
+
       if (from == null) return;
-      
+
       final parts = from.split('/');
       if (parts.length != 2) return;
-      
+
       final roomJid = parts[0];
       final nickname = parts[1];
-      
+
       // Check if this is a MUC presence
-      final mucUser = presence.findElements('x')
-          .where((x) => x.getAttribute('xmlns') == 'http://jabber.org/protocol/muc#user')
+      final mucUser = presence
+          .findElements('x')
+          .where((x) =>
+              x.getAttribute('xmlns') == 'http://jabber.org/protocol/muc#user')
           .firstOrNull;
-      
+
       if (mucUser == null) return;
-      
+
       final room = _rooms[roomJid];
       if (room == null) return;
-      
+
       if (type == 'unavailable') {
         _handleParticipantLeft(room, nickname, mucUser);
       } else {
@@ -513,20 +516,20 @@ class MucManager {
       final from = message.getAttribute('from');
       final type = message.getAttribute('type');
       final id = message.getAttribute('id');
-      
+
       if (from == null || type != MessageType.groupchat.value) return;
-      
+
       final parts = from.split('/');
       final roomJid = parts[0];
       final nickname = parts.length > 1 ? parts[1] : null;
-      
+
       final room = _rooms[roomJid];
       if (room == null || !room.isJoined) return;
-      
+
       final body = message.findElements('body').firstOrNull?.value;
       final subject = message.findElements('subject').firstOrNull?.value;
       final thread = message.findElements('thread').firstOrNull?.value;
-      
+
       final mucMessage = MucMessage(
         id: id ?? _generateId('msg'),
         roomJid: roomJid,
@@ -537,9 +540,9 @@ class MucManager {
         timestamp: DateTime.now(),
         isPrivate: false,
       );
-      
+
       _mucMessageController.add(mucMessage);
-      
+
       // Handle subject change
       if (subject != null) {
         final updatedRoom = room.copyWith(subject: subject);
@@ -585,7 +588,7 @@ class MucManager {
         });
       });
     });
-    
+
     return builder.buildDocument();
   }
 
@@ -619,22 +622,24 @@ class MucManager {
         });
       });
     });
-    
+
     return builder.buildDocument();
   }
 
   /// Handle participant joining
-  void _handleParticipantJoined(MucRoom room, String nickname, XmlElement presence, XmlElement mucUser) {
+  void _handleParticipantJoined(
+      MucRoom room, String nickname, XmlElement presence, XmlElement mucUser) {
     final item = mucUser.findElements('item').firstOrNull;
     if (item == null) return;
-    
+
     final role = MucRole.fromString(item.getAttribute('role') ?? 'none');
-    final affiliation = MucAffiliation.fromString(item.getAttribute('affiliation') ?? 'none');
+    final affiliation =
+        MucAffiliation.fromString(item.getAttribute('affiliation') ?? 'none');
     final realJid = item.getAttribute('jid');
-    
+
     final show = presence.findElements('show').firstOrNull?.value;
     final status = presence.findElements('status').firstOrNull?.value;
-    
+
     final participant = MucParticipant(
       nickname: nickname,
       realJid: realJid,
@@ -646,28 +651,32 @@ class MucManager {
       isOnline: true,
       joinedAt: DateTime.now(),
     );
-    
+
     // Update room with new participant
     final participants = List<MucParticipant>.from(room.participants);
-    final existingIndex = participants.indexWhere((p) => p.nickname == nickname);
-    
+    final existingIndex =
+        participants.indexWhere((p) => p.nickname == nickname);
+
     if (existingIndex >= 0) {
       participants[existingIndex] = participant;
     } else {
       participants.add(participant);
     }
-    
+
     final updatedRoom = room.copyWith(
       participants: participants,
       occupantCount: participants.length,
       isJoined: nickname == room.userNickname ? true : room.isJoined,
       userRole: nickname == room.userNickname ? role : room.userRole,
-      userAffiliation: nickname == room.userNickname ? affiliation : room.userAffiliation,
-      joinedAt: nickname == room.userNickname && !room.isJoined ? DateTime.now() : room.joinedAt,
+      userAffiliation:
+          nickname == room.userNickname ? affiliation : room.userAffiliation,
+      joinedAt: nickname == room.userNickname && !room.isJoined
+          ? DateTime.now()
+          : room.joinedAt,
     );
-    
+
     _rooms[room.jid] = updatedRoom;
-    
+
     // Emit events
     if (nickname == room.userNickname) {
       _roomEventController.add(MucRoomEvent(
@@ -675,7 +684,7 @@ class MucManager {
         room: updatedRoom,
       ));
     }
-    
+
     _participantEventController.add(MucParticipantEvent(
       type: MucParticipantEventType.joined,
       room: updatedRoom,
@@ -684,21 +693,23 @@ class MucManager {
   }
 
   /// Handle participant leaving
-  void _handleParticipantLeft(MucRoom room, String nickname, XmlElement mucUser) {
+  void _handleParticipantLeft(
+      MucRoom room, String nickname, XmlElement mucUser) {
     final participants = List<MucParticipant>.from(room.participants);
-    final participantIndex = participants.indexWhere((p) => p.nickname == nickname);
-    
+    final participantIndex =
+        participants.indexWhere((p) => p.nickname == nickname);
+
     if (participantIndex >= 0) {
       final participant = participants.removeAt(participantIndex);
-      
+
       final updatedRoom = room.copyWith(
         participants: participants,
         occupantCount: participants.length,
         isJoined: nickname == room.userNickname ? false : room.isJoined,
       );
-      
+
       _rooms[room.jid] = updatedRoom;
-      
+
       // Emit events
       if (nickname == room.userNickname) {
         _roomEventController.add(MucRoomEvent(
@@ -706,7 +717,7 @@ class MucManager {
           room: updatedRoom,
         ));
       }
-      
+
       _participantEventController.add(MucParticipantEvent(
         type: MucParticipantEventType.left,
         room: updatedRoom,
@@ -783,7 +794,8 @@ class MucParticipantEvent {
   });
 
   @override
-  String toString() => 'MucParticipantEvent(type: $type, participant: ${participant.nickname})';
+  String toString() =>
+      'MucParticipantEvent(type: $type, participant: ${participant.nickname})';
 }
 
 /// MUC message
@@ -809,5 +821,6 @@ class MucMessage {
   });
 
   @override
-  String toString() => 'MucMessage(id: $id, room: $roomJid, sender: $senderNickname, body: $body)';
+  String toString() =>
+      'MucMessage(id: $id, room: $roomJid, sender: $senderNickname, body: $body)';
 }

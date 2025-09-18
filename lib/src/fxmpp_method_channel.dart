@@ -1,10 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:fxmpp/src/core/xmpp_connection_config.dart';
+import 'package:fxmpp/src/core/xmpp_connection_state.dart';
 import 'package:xml/xml.dart';
 
 import 'fxmpp_platform_interface.dart';
-import 'models/xmpp_connection_config.dart';
-import 'models/xmpp_connection_state.dart';
 
 /// An implementation of [FxmppPlatform] that uses method channels.
 class MethodChannelFxmpp extends FxmppPlatform {
@@ -186,7 +186,8 @@ class MethodChannelFxmpp extends FxmppPlatform {
     if (maxStanzas != null) params['maxStanzas'] = maxStanzas;
     if (since != null) params['since'] = since.millisecondsSinceEpoch;
 
-    final result = await methodChannel.invokeMethod<bool>('joinMucRoom', params);
+    final result =
+        await methodChannel.invokeMethod<bool>('joinMucRoom', params);
     return result ?? false;
   }
 
@@ -200,7 +201,8 @@ class MethodChannelFxmpp extends FxmppPlatform {
     };
     if (reason != null) params['reason'] = reason;
 
-    final result = await methodChannel.invokeMethod<bool>('leaveMucRoom', params);
+    final result =
+        await methodChannel.invokeMethod<bool>('leaveMucRoom', params);
     return result ?? false;
   }
 
@@ -213,8 +215,8 @@ class MethodChannelFxmpp extends FxmppPlatform {
 
   @override
   Future<bool> sendMucPrivateMessage(XmlDocument message) async {
-    final result = await methodChannel
-        .invokeMethod<bool>('sendMucPrivateMessage', {'xml': message.toXmlString()});
+    final result = await methodChannel.invokeMethod<bool>(
+        'sendMucPrivateMessage', {'xml': message.toXmlString()});
     return result ?? false;
   }
 
@@ -228,7 +230,8 @@ class MethodChannelFxmpp extends FxmppPlatform {
       'subject': subject,
     };
 
-    final result = await methodChannel.invokeMethod<bool>('changeMucSubject', params);
+    final result =
+        await methodChannel.invokeMethod<bool>('changeMucSubject', params);
     return result ?? false;
   }
 
@@ -244,7 +247,8 @@ class MethodChannelFxmpp extends FxmppPlatform {
     };
     if (reason != null) params['reason'] = reason;
 
-    final result = await methodChannel.invokeMethod<bool>('kickMucParticipant', params);
+    final result =
+        await methodChannel.invokeMethod<bool>('kickMucParticipant', params);
     return result ?? false;
   }
 
@@ -276,7 +280,8 @@ class MethodChannelFxmpp extends FxmppPlatform {
     };
     if (reason != null) params['reason'] = reason;
 
-    final result = await methodChannel.invokeMethod<bool>('grantMucVoice', params);
+    final result =
+        await methodChannel.invokeMethod<bool>('grantMucVoice', params);
     return result ?? false;
   }
 
@@ -292,7 +297,8 @@ class MethodChannelFxmpp extends FxmppPlatform {
     };
     if (reason != null) params['reason'] = reason;
 
-    final result = await methodChannel.invokeMethod<bool>('revokeMucVoice', params);
+    final result =
+        await methodChannel.invokeMethod<bool>('revokeMucVoice', params);
     return result ?? false;
   }
 
@@ -308,7 +314,8 @@ class MethodChannelFxmpp extends FxmppPlatform {
     };
     if (reason != null) params['reason'] = reason;
 
-    final result = await methodChannel.invokeMethod<bool>('grantMucModerator', params);
+    final result =
+        await methodChannel.invokeMethod<bool>('grantMucModerator', params);
     return result ?? false;
   }
 
@@ -324,7 +331,8 @@ class MethodChannelFxmpp extends FxmppPlatform {
     };
     if (reason != null) params['reason'] = reason;
 
-    final result = await methodChannel.invokeMethod<bool>('grantMucMembership', params);
+    final result =
+        await methodChannel.invokeMethod<bool>('grantMucMembership', params);
     return result ?? false;
   }
 
@@ -340,7 +348,8 @@ class MethodChannelFxmpp extends FxmppPlatform {
     };
     if (reason != null) params['reason'] = reason;
 
-    final result = await methodChannel.invokeMethod<bool>('grantMucAdmin', params);
+    final result =
+        await methodChannel.invokeMethod<bool>('grantMucAdmin', params);
     return result ?? false;
   }
 
@@ -356,7 +365,8 @@ class MethodChannelFxmpp extends FxmppPlatform {
     };
     if (reason != null) params['reason'] = reason;
 
-    final result = await methodChannel.invokeMethod<bool>('inviteMucUser', params);
+    final result =
+        await methodChannel.invokeMethod<bool>('inviteMucUser', params);
     return result ?? false;
   }
 
@@ -372,7 +382,8 @@ class MethodChannelFxmpp extends FxmppPlatform {
     if (reason != null) params['reason'] = reason;
     if (alternativeRoom != null) params['alternativeRoom'] = alternativeRoom;
 
-    final result = await methodChannel.invokeMethod<bool>('destroyMucRoom', params);
+    final result =
+        await methodChannel.invokeMethod<bool>('destroyMucRoom', params);
     return result ?? false;
   }
 
@@ -388,7 +399,8 @@ class MethodChannelFxmpp extends FxmppPlatform {
     };
     if (password != null) params['password'] = password;
 
-    final result = await methodChannel.invokeMethod<bool>('createMucRoom', params);
+    final result =
+        await methodChannel.invokeMethod<bool>('createMucRoom', params);
     return result ?? false;
   }
 

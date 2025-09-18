@@ -5,28 +5,28 @@ import 'muc_affiliation.dart';
 class MucParticipant {
   /// The participant's nickname in the room
   final String nickname;
-  
+
   /// The participant's real JID (if known and allowed to be seen)
   final String? realJid;
-  
+
   /// The participant's full JID in the room (room@server/nickname)
   final String roomJid;
-  
+
   /// The participant's current role in the room
   final MucRole role;
-  
+
   /// The participant's affiliation with the room
   final MucAffiliation affiliation;
-  
+
   /// The participant's status message
   final String? status;
-  
+
   /// The participant's show status (away, dnd, etc.)
   final String? show;
-  
+
   /// Whether the participant is currently online
   final bool isOnline;
-  
+
   /// When the participant joined the room
   final DateTime? joinedAt;
 
@@ -93,7 +93,7 @@ class MucParticipant {
       status: map['status'] as String?,
       show: map['show'] as String?,
       isOnline: map['isOnline'] as bool? ?? true,
-      joinedAt: map['joinedAt'] != null 
+      joinedAt: map['joinedAt'] != null
           ? DateTime.fromMillisecondsSinceEpoch(map['joinedAt'] as int)
           : null,
     );
