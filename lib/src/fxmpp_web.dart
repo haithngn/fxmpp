@@ -64,6 +64,13 @@ class FxmppWeb extends FxmppPlatform {
       // Negotiation succeeded — set up stanza routing
       _setupStanzaRouting();
       _updateState(XmppConnectionState.connected);
+
+      // Send initial presence so the server knows we're online.
+      // Native libraries (Smack, XMPPFramework) do this automatically;
+      // on web we must do it explicitly or the server won't route
+      // incoming stanzas to this resource.
+      _webSocket!.send('<presence xmlns="jabber:client"/>');
+
       return true;
     } on XmppStreamException catch (e) {
       _updateState(e.state);
