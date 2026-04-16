@@ -130,8 +130,9 @@ class _MyHomePageState extends State<MyHomePage> {
       username: _usernameController.text,
       password: _passwordController.text,
       domain: _domainController.text,
-      useSSL: true,
+      useSSL: false,
       allowSelfSignedCertificates: true,
+      wsUrl: 'ws://localhost:5443/ws',
       resource: 'fxmpp_example',
     );
 
