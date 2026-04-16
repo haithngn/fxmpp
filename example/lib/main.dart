@@ -375,71 +375,69 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget _buildConnectionTab() {
-    return Padding(
+    return ListView(
       padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          TextField(
-            controller: _hostController,
-            decoration: const InputDecoration(
-              labelText: 'Host',
-              border: OutlineInputBorder(),
-            ),
+      children: [
+        TextField(
+          controller: _hostController,
+          decoration: const InputDecoration(
+            labelText: 'Host',
+            border: OutlineInputBorder(),
           ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _portController,
-            decoration: const InputDecoration(
-              labelText: 'Port',
-              border: OutlineInputBorder(),
-            ),
-            keyboardType: TextInputType.number,
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: _portController,
+          decoration: const InputDecoration(
+            labelText: 'Port',
+            border: OutlineInputBorder(),
           ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _usernameController,
-            decoration: const InputDecoration(
-              labelText: 'Username',
-              border: OutlineInputBorder(),
-            ),
+          keyboardType: TextInputType.number,
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: _usernameController,
+          decoration: const InputDecoration(
+            labelText: 'Username',
+            border: OutlineInputBorder(),
           ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _passwordController,
-            decoration: const InputDecoration(
-              labelText: 'Password',
-              border: OutlineInputBorder(),
-            ),
-            obscureText: true,
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: _passwordController,
+          decoration: const InputDecoration(
+            labelText: 'Password',
+            border: OutlineInputBorder(),
           ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _domainController,
-            decoration: const InputDecoration(
-              labelText: 'Domain',
-              border: OutlineInputBorder(),
-            ),
+          obscureText: true,
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: _domainController,
+          decoration: const InputDecoration(
+            labelText: 'Domain',
+            border: OutlineInputBorder(),
           ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: _connectionState.isConnected ? null : _connect,
-                  child: const Text('Connect'),
-                ),
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(
+              child: ElevatedButton(
+                onPressed: _connectionState.isConnected ? null : _connect,
+                child: const Text('Connect'),
               ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: _connectionState.isConnected ? _disconnect : null,
-                  child: const Text('Disconnect'),
-                ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: ElevatedButton(
+                onPressed: _connectionState.isConnected ? _disconnect : null,
+                child: const Text('Disconnect'),
               ),
-            ],
-          ),
-        ],
-      ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
@@ -873,7 +871,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget _buildMucTab() {
-    return Column(
+    return ListView(
       children: [
         if (_connectionState.isConnected) ...[
           Padding(
@@ -1130,66 +1128,64 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           const Divider(),
         ],
-        Expanded(
-          child: _mucEvents.isEmpty
-              ? const Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.group_outlined, size: 64, color: Colors.grey),
-                      SizedBox(height: 16),
-                      Text(
-                        'No MUC events yet',
-                        style: TextStyle(color: Colors.grey, fontSize: 16),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'Join a room to see events',
-                        style: TextStyle(color: Colors.grey, fontSize: 12),
-                      ),
-                    ],
-                  ),
-                )
-              : ListView.builder(
-                  itemCount: _mucEvents.length,
-                  itemBuilder: (context, index) {
-                    final event = _mucEvents[index];
-                    final eventType = event.type.name;
-                    final roomJid = event.room.jid;
-                    final nickname = event.data?['nickname'] as String? ?? '';
-                    final message = event.data?['message'] as String? ?? '';
-
-                    return Card(
-                      margin: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      child: ListTile(
-                        leading: Icon(
-                          _getMucEventIcon(eventType),
-                          color: _getMucEventColor(eventType),
-                        ),
-                        title: Text(
-                          _getMucEventTitle(eventType, nickname, roomJid),
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (message.isNotEmpty) Text(message),
-                            Text(
-                              'Room: ${roomJid.split('@').first}',
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                            Text(
-                              DateTime.now().toString().substring(11, 16),
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
+        _mucEvents.isEmpty
+            ? const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.group_outlined, size: 64, color: Colors.grey),
+                    SizedBox(height: 16),
+                    Text(
+                      'No MUC events yet',
+                      style: TextStyle(color: Colors.grey, fontSize: 16),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'Join a room to see events',
+                      style: TextStyle(color: Colors.grey, fontSize: 12),
+                    ),
+                  ],
                 ),
-        ),
+              )
+            : ListView.builder(
+                itemCount: _mucEvents.length,
+                itemBuilder: (context, index) {
+                  final event = _mucEvents[index];
+                  final eventType = event.type.name;
+                  final roomJid = event.room.jid;
+                  final nickname = event.data?['nickname'] as String? ?? '';
+                  final message = event.data?['message'] as String? ?? '';
+
+                  return Card(
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    child: ListTile(
+                      leading: Icon(
+                        _getMucEventIcon(eventType),
+                        color: _getMucEventColor(eventType),
+                      ),
+                      title: Text(
+                        _getMucEventTitle(eventType, nickname, roomJid),
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (message.isNotEmpty) Text(message),
+                          Text(
+                            'Room: ${roomJid.split('@').first}',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                          Text(
+                            DateTime.now().toString().substring(11, 16),
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
       ],
     );
   }
