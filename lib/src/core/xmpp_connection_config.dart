@@ -9,6 +9,10 @@ class XmppConnectionConfig {
   final bool allowSelfSignedCertificates;
   final String? resource;
 
+  /// WebSocket URL for web platform (e.g. `wss://example.com:5443/ws`).
+  /// Required on web, ignored on iOS/Android.
+  final String? wsUrl;
+
   const XmppConnectionConfig({
     required this.host,
     required this.port,
@@ -18,6 +22,7 @@ class XmppConnectionConfig {
     this.useSSL = true,
     this.allowSelfSignedCertificates = false,
     this.resource,
+    this.wsUrl,
   });
 
   Map<String, dynamic> toMap() {
@@ -30,6 +35,7 @@ class XmppConnectionConfig {
       'useSSL': useSSL,
       'allowSelfSignedCertificates': allowSelfSignedCertificates,
       'resource': resource,
+      'wsUrl': wsUrl,
     };
   }
 
@@ -43,12 +49,13 @@ class XmppConnectionConfig {
       useSSL: map['useSSL'] ?? true,
       allowSelfSignedCertificates: map['allowSelfSignedCertificates'] ?? false,
       resource: map['resource'],
+      wsUrl: map['wsUrl'],
     );
   }
 
   @override
   String toString() {
-    return 'XmppConnectionConfig(host: $host, port: $port, username: $username, domain: $domain, useSSL: $useSSL, resource: $resource)';
+    return 'XmppConnectionConfig(host: $host, port: $port, username: $username, domain: $domain, useSSL: $useSSL, resource: $resource, wsUrl: $wsUrl)';
   }
 
   @override
@@ -62,7 +69,8 @@ class XmppConnectionConfig {
         other.domain == domain &&
         other.useSSL == useSSL &&
         other.allowSelfSignedCertificates == allowSelfSignedCertificates &&
-        other.resource == resource;
+        other.resource == resource &&
+        other.wsUrl == wsUrl;
   }
 
   @override
@@ -76,6 +84,7 @@ class XmppConnectionConfig {
       useSSL,
       allowSelfSignedCertificates,
       resource,
+      wsUrl,
     );
   }
 }
