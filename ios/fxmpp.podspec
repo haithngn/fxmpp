@@ -10,7 +10,7 @@ supporting both iOS and Android platforms with real-time messaging capabilities.
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'Hai Nguyen' => 'hai@hainguyen.dev' }
   s.source           = { :path => '.' }
-  s.source_files = 'Classes/**/*'
+  s.source_files = 'fxmpp/Sources/fxmpp/**/*'
   s.dependency 'Flutter'
   s.dependency 'XMPPFramework', '~> 4.0'
   s.platform = :ios, '11.0'
